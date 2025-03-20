@@ -1,7 +1,0 @@
-tk
-requests
-beautifulsoup4
-pyinstaller
-pandas 
-matplotlib
-customtkinter
