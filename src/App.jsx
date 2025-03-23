@@ -37,6 +37,13 @@ function App() {
       </div>
       
       </div>
+
+      <div class="container">
+        <div>
+          <h3> Generated Schedules </h3>
+
+        </div>
+      </div>
     </>
   );
 }
