@@ -12,17 +12,31 @@ function App() {
 
   return (
     <>
-      
       <h1>SmartSchedule</h1>
+      <h3>Temple Course Schedule Generator</h3>
 
-      <input
-        type="text"
-        placeholder="Search for Course..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+      <div class="container">
+        
+      <div>
+      <h3>Available Courses</h3>
+        <input
+          type="text"
+          placeholder="Search for Course..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <button onClick={handleClick}>Search</button>
+      </div>
 
-      <button onClick={handleClick}>Search</button>
+      <div>
+        <h3>Selected Courses</h3>
+      </div>
+
+      <div>
+        <h3>Schedule Restictions</h3>
+      </div>
+      
+      </div>
     </>
   );
 }
