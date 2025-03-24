@@ -18,6 +18,18 @@
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
 
+.dropdown {
+  border: 1px solid #ccc;
+  width: 200px;
+  overflow-y: auto;
+  list-style: none; 
+  padding: 0;
+}
+
+.selected-courses {
+  list-style: none; 
+}
+
 @keyframes logo-spin {
   from {
     transform: rotate(0deg);
@@ -40,3 +52,22 @@
 .read-the-docs {
   color: #888;
 }
+
+.container {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  padding: 10px;
+  column-gap: 30px;
+}
+
+.container > div {
+  /* background-color: #0c1b7c9e; */
+  /* border: 5px solid #08346d81; */
+  padding: 50px;
+  border-style: solid;
+  border-color: #ffffff;
+  border-radius: 4px;
+  text-align: 'center';
+}
+
+
