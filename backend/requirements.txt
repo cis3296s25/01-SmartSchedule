@@ -1,0 +1,4 @@
+fastapi==0.95.2
+uvicorn
+requests
+beautifulsoup4
