@@ -31,7 +31,6 @@
 
 ### Requirements
 
-Before running the backend, make sure you have:
 
 - Python 3.9+
 - pip (Python package manager)
@@ -66,21 +65,21 @@ Once the server is running, you can test these endpoints in your browser
 
 
 ###  All Subjects (Hardcoded for now)  
-- **GET** [`http://localhost:8001/api/subjects`](http://localhost:8001/api/subjects)
+- **GET** [`http://localhost:8000/api/subjects`](http://localhost:8001/api/subjects)
 
 
 
 ###  All Courses for a Subject  
 - **GET** `/api/courses?subject=<SUBJECT>&term_code=<TERM_CODE>`
 
-- **Example**: [`http://localhost:8001/api/courses?subject=CIS&term_code=202503`](http://localhost:8001/api/courses?subject=CIS&term_code=202503)
+- **Example**: [`http://localhost:8000/api/courses?subject=CIS&term_code=202503`](http://localhost:8001/api/courses?subject=CIS&term_code=202503)
 
 
 ###  All Courses for All Subjects  
 
 - **GET** `/api/all-courses?term_code=<TERM_CODE>`
 
-- **Example**: [`http://localhost:8001/api/all-courses?term_code=202503`](http://localhost:8001/api/all-courses?term_code=202503)
+- **Example**: [`http://localhost:8000/api/all-courses?term_code=202503`](http://localhost:8001/api/all-courses?term_code=202503)
 
 ---
 
