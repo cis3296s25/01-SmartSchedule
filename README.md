@@ -84,7 +84,7 @@ Once the server is running, you can test these endpoints in your browser
 ---
 
 ### Swagger UI 
-You can also test the APIs in this interactive UI: [`http://localhost:8001/docs`](http://localhost:8001/docs)
+You can also test the APIs in this interactive UI: [`http://localhost:8001/docs`](http://localhost:8000/docs)
 
 ---
 
