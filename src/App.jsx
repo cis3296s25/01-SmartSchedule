@@ -61,7 +61,25 @@ function App() {
           <h3>Attributes</h3>
           <p>Choose your semester from the dropdown below.</p>
           
+          <input
+            type="text"
+            placeholder="Select semester"
+            value={semester}
+            onFocus={() => setShowSemesterDropdown(true)} //show dropdown on focus
+            onChange={(e) => setSemester(e.target.value)} //update semester value
+          />
+
+          {showSemesterDropdown && semesters.length > 0 && (
+            <ul className="dropdown">
+              {semesters.map((sem, index) => (
+                <li key={index} onClick={() => handleSelectSemester(sem)}>
+                  {sem}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
+
         <div>
           <h3>Available Courses</h3>
             <input
@@ -109,7 +127,6 @@ function App() {
       <div class="container">
         <div>
           <h3> Generated Schedules </h3>
-
         </div>
       </div>
     </>
