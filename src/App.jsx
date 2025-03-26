@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useEffect } from 'react'
 import './App.css'
 
 function App() {
@@ -25,12 +26,35 @@ function App() {
     setShowSemesterDropdown(false); //close dropdown after selecting
   }
 
-  const courses = [       //temp course list
+  // const courses = [       //temp course list
 
-    "CIS 1001",
-    "CIS 2001",
-    "CIS 3001"
-  ];
+  //   "CIS 1001",
+  //   "CIS 2001",
+  //   "CIS 3001"
+  // ];
+
+  useEffect(() => {
+    if (semester) {
+      const termCodeMap = {
+        "Spring 2025": "202503",
+        "Fall 2025": "202509",
+        "Fall 2024": "202409",
+      };
+  
+      const selectedTermCode = termCodeMap[semester];
+  
+      fetch(`http://localhost:8000/api/courses?subject=CIS&term_code=${selectedTermCode}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.courses && Array.isArray(data.courses)) {
+            setCourses(data.courses.map(course => course.code));
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching courses:", error);
+        });
+    }
+  }, [semester]); // re-fetch when semester changes
 
   const handleSelectCourse = (course) => {
     setSearch(course);
