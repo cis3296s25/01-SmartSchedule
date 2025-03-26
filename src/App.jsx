@@ -74,12 +74,12 @@ function App() {
 
   return (
     <>
-      <h1>SmartSchedule</h1>
-      <h3>Temple Course Schedule Generator</h3>
+      <h1>SmartSchedule 📅 </h1>
+      <h3>Temple's Course Schedule Generator</h3>
 
       <div class="container">
         <div>
-          <h3>Attributes</h3>
+          <h3>Semester</h3>
           <p>Choose your semester from the dropdown below.</p>
           
           <input
@@ -142,17 +142,19 @@ function App() {
           )}
         </div>
 
-        <div style={{ marginTop: '1rem' }}>
-          <button onClick={saveSchedule}>💾 Save Schedule</button>
-          <button onClick={loadSchedule}>📂 Load Schedule</button>
-          {message && <p>{message}</p>}
-        </div>
+        
 
         <div>
           <h3>Schedule Restrictions</h3>
         </div>
       </div>
 
+      <div style={{ marginTop: '1rem' }}>
+          <button onClick={saveSchedule}>💾 Save Schedule</button>
+          <button onClick={loadSchedule}>📂 Load Schedule</button>
+          {message && <p>{message}</p>}
+        </div>
+        
       <div class="container">
         <div>
           <h3> Generated Schedules </h3>
