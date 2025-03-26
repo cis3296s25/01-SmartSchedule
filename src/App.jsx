@@ -49,6 +49,10 @@ function App() {
     setSelectedCourses(selectedCourses.filter(item => item !== course));
   }
 
+  const handleClearCourses = () => {
+    setSelectedCourses([]);
+  };
+
   const saveSchedule = () => {
     localStorage.setItem('savedSchedule', JSON.stringify(selectedCourses));
     setMessage('✅ Schedule saved!');
@@ -125,13 +129,16 @@ function App() {
           {selectedCourses.length === 0 ? (
             <p>No courses selected</p>
           ) : (
-            <ul>
-              {selectedCourses.map((course, index) => (
-                <li key={index}>
-                  {course} <button onClick={() => handleRemoveCourse(course)}>Remove</button>
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul>
+                {selectedCourses.map((course, index) => (
+                  <li key={index}>
+                    {course} <button onClick={() => handleRemoveCourse(course)}>Remove</button>
+                  </li>
+                ))}
+              </ul>
+              <button onClick={handleClearCourses}>Clear All</button>
+            </>
           )}
         </div>
 
