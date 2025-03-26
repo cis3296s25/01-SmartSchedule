@@ -45,6 +45,9 @@ function App() {
 
       <div class="container">
         <div>
+          <h3>Attributes</h3>
+        </div>
+        <div>
           <h3>Available Courses</h3>
             <input
             type="text"
