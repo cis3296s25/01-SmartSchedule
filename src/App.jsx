@@ -6,10 +6,23 @@ function App() {
   const [message, setMessage] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedCourses, setSelectedCourses] = useState([]);
+  const [semester, setSemester] = useState('');
+  const [showSemesterDropdown, setShowSemesterDropdown] = useState(false);
 
   const handleClick = () => {
     setMessage(`Searching for: ${search}`);     //handles search button
   };
+
+  const semesters = [
+    "Fall 2025",
+    "Spring 2025",
+    "Fall 2024"
+  ]
+
+  const handleSelectSemester = (sem) => {
+    setSemester(sem);
+    setShowSemesterDropdown(false); //close dropdown after selecting
+  }
 
   const courses = [       //temp course list
     "CIS 1001",
@@ -46,6 +59,8 @@ function App() {
       <div class="container">
         <div>
           <h3>Attributes</h3>
+          <p>Choose your semester from the dropdown below.</p>
+          
         </div>
         <div>
           <h3>Available Courses</h3>
