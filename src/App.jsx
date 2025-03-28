@@ -9,11 +9,6 @@ function App() {
   const [semester, setSemester] = useState('');
   const [showSemesterDropdown, setShowSemesterDropdown] = useState(false);
 
-  const handleClick = () => {
-    setMessage(`Searching for: ${search}`);
-  };
-
-
   const semesters = [
     "Fall 2025",
     "Spring 2025",
@@ -25,8 +20,11 @@ function App() {
     setShowSemesterDropdown(false); //close dropdown after selecting
   }
 
-  const courses = [       //temp course list
+  const courseList = () => { //list to display the course list
+    const [courses, setCourses] = useState([]);
+  }
 
+  const courses = [ //temp course list
     "CIS 1001",
     "CIS 2001",
     "CIS 3001"
@@ -79,9 +77,8 @@ function App() {
 
       <div class="container">
         <div>
-          <h3>Semester</h3>
-          <p>Choose your semester from the dropdown below.</p>
-          
+          <h3>Select Semester</h3>
+        
           <input
             type="text"
             placeholder="Select semester"
@@ -102,6 +99,12 @@ function App() {
         </div>
 
         <div>
+          <h3>Schedule Restrictions</h3>
+        </div>
+      </div>
+
+      <div class="container">
+      <div>
           <h3>Available Courses</h3>
           <input
             type="text"
@@ -110,7 +113,6 @@ function App() {
             onFocus={() => setShowDropdown(true)}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <button onClick={handleClick}>Search</button>
           <button onClick={handleAddCourse}>Add</button>
 
           {showDropdown && filteredCourses.length > 0 && (
@@ -140,12 +142,6 @@ function App() {
               <button onClick={handleClearCourses}>Clear All</button>
             </>
           )}
-        </div>
-
-        
-
-        <div>
-          <h3>Schedule Restrictions</h3>
         </div>
       </div>
 
