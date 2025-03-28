@@ -22,69 +22,88 @@ def fetch_courses(term_code: str, subject: str) -> list[dict]:
 
     Returns list of dictionaries where each dictionary represents a course section
     """
-    courses = []
-
-    # search payload Temple expects when filtering by subject
-    search_args = {
-        "txt_subject": subject,
-        "term": term_code,
-        "txt_term": term_code
-    }
-
-    # params to paginate and sort search results
-    results_args = {
-        **search_args,
-        "pageOffset": 0,
-        "pageMaxSize": 50, # this limits to 50 results.. will have to change later
-        "sortColumn": "subjectDescription",
-        "sortDirection": "asc"
-    }
-
     try:
+        courses = []
         session = requests.Session()
+
         # establish session
         session.post("https://prd-xereg.temple.edu/StudentRegistrationSsb/")
-        # search on class search form for subject
-        session.post("https://prd-xereg.temple.edu/StudentRegistrationSsb/ssb/term/search?mode=search", search_args)
 
-        # request course listings
-        response = session.post(
-            "https://prd-xereg.temple.edu/StudentRegistrationSsb/ssb/searchResults/searchResults?startDatepicker=&endDatepicker=",
-            data=results_args
-        )
-        # convert to dictionary
-        data = response.json()
+        # search payload Temple expects - simulate real user searching for class
+        session.post("https://prd-xereg.temple.edu/StudentRegistrationSsb/ssb/term/search?mode=search", {
+            "txt_subject": subject,
+            "term": term_code,
+            "txt_term": term_code
+        })
 
-        for section in data.get("data", []):
-            course = {
-                "code": f"{section['subject']} {section['courseNumber']}",
-                "title": section["courseTitle"],
-                "CRN": section["courseReferenceNumber"],
-                "professor": section["faculty"][0]["displayName"] if section.get("faculty") else "N/A",
-                "creditHours": section.get("creditHourLow") or section.get("creditHourHigh"),
-                "meetingTimes": []
+        page_offset = 0 # start at beginning
+        page_size = 50  # Temple returns 50 results per page
+
+        while True:
+
+            # params to paginate and sort search results
+            results_args = {
+                "txt_subject": subject,
+                "term": term_code,
+                "txt_term": term_code,
+                "pageOffset": page_offset,  # which page
+                "pageMaxSize": page_size,   # how many results to return per page
+                "sortColumn": "subjectDescription",
+                "sortDirection": "asc"
             }
 
-            for mt in section.get("meetingsFaculty", []):
-                mt_info = mt.get("meetingTime", {})
-                meeting = {
-                    "start": mt_info.get("beginTime"),
-                    "end": mt_info.get("endTime"),
-                    "days": [
-                        day for day in ["monday", "tuesday", "wednesday", "thursday", "friday"]
-                        if mt_info.get(day)
-                    ],
-                    "type": mt_info.get("meetingTypeDescription")
-                }
-                course["meetingTimes"].append(meeting)
+            # request course listings
+            response = session.post(
+                "https://prd-xereg.temple.edu/StudentRegistrationSsb/ssb/searchResults/searchResults?startDatepicker=&endDatepicker=",
+                data=results_args
+            )
 
-            courses.append(course)
+            data = response.json()
+            sections = data.get("data", [])
+
+            # if no more sections, break
+            if not sections:
+                break
+
+            # format data
+            for section in sections:
+                course = {
+                    "code": f"{section['subject']} {section['courseNumber']}",
+                    "title": section["courseTitle"],
+                    "CRN": section["courseReferenceNumber"],
+                    "professor": section["faculty"][0]["displayName"] if section.get("faculty") else "N/A",
+                    "creditHours": section.get("creditHourLow") or section.get("creditHourHigh"),
+                    "meetingTimes": []
+                }
+
+                # meeting times
+                for mt in section.get("meetingsFaculty", []):
+                    mt_info = mt.get("meetingTime", {})
+                    meeting = {
+                        "start": mt_info.get("beginTime"),
+                        "end": mt_info.get("endTime"),
+                        "days": [
+                            day for day in ["monday", "tuesday", "wednesday", "thursday", "friday"]
+                            if mt_info.get(day)
+                        ],
+                        "type": mt_info.get("meetingTypeDescription")
+                    }
+                    course["meetingTimes"].append(meeting)
+
+                # add course to list
+                courses.append(course)
+
+            # if sections is less than results returned on page, end of sections
+            if len(sections) < page_size:
+                break
+
+            page_offset += page_size
+            time.sleep(0.3)  # give the server some time
 
         return courses
 
     except Exception as e:
         return [{"error": f"Failed to fetch courses for {subject}: {str(e)}"}]
-
 
 def get_all_courses(term_code: str) -> list[dict]:
     """
@@ -122,12 +141,13 @@ def get_all_courses(term_code: str) -> list[dict]:
     all_courses = []
     subjects = get_all_subjects()
 
+    # for each subject in the list, call fetch courses to get all courses from all subjects
     for subject in subjects:
         print(f"Fetching courses for subject: {subject}")
         try:
             courses = fetch_courses(term_code, subject)
             all_courses.extend(courses)
-            time.sleep(0.5)  # avoid getting blocked
+            time.sleep(0.3)  # avoid getting blocked
         except Exception as e:
             print(f"Error fetching {subject}: {e}")
 

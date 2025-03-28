@@ -43,6 +43,10 @@
     ```
     pip install -r requirements.txt
     ```
+   
+   - Pip will install all backend dependencies required for this application.
+
+
 2. Start the server using 
     ```
     uvicorn main:app --reload --port 8000
@@ -55,7 +59,9 @@
 
 ### API Endpoints
 
-Once the server is running, you can test these endpoints in your browser
+Once the server is running, you can test these endpoints in your browser. 
+
+If using a port different from 8000, be sure to replace 8000 with your port.
 
 
 
@@ -70,7 +76,7 @@ Once the server is running, you can test these endpoints in your browser
 
 
 ###  All Courses for a Subject  
-- **GET** `/api/courses?subject=<SUBJECT>&term_code=<TERM_CODE>`
+- **GET** `/api/subject/courses?subject=<SUBJECT>&term_code=<TERM_CODE>`
 
 - **Example**: [`http://localhost:8000/api/courses?subject=CIS&term_code=202503`](http://localhost:8001/api/courses?subject=CIS&term_code=202503)
 
@@ -84,7 +90,7 @@ Once the server is running, you can test these endpoints in your browser
 ---
 
 ### Swagger UI 
-You can also test the APIs in this interactive UI: [`http://localhost:8001/docs`](http://localhost:8000/docs)
+You can also test all APIs in this interactive UI: [`http://localhost:8000/docs`](http://localhost:8000/docs)
 
 ---
 

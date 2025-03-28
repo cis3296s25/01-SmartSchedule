@@ -17,20 +17,20 @@ app.add_middleware(
 def root():
     return {"message": "SmartSchedule backend is running "}
 
-@app.get("/api/courses")
-def get_courses(
+@app.get("/api/subject/courses", description="Get all courses for a specific subject")
+def courses_for_subject(
     subject: str = Query(..., description="Subject code: CIS for Computer Information Systems "),
     term_code: str = Query(..., description="6-digit term code: 202503 for Spring 2025")
 ):
     return {"courses": fetch_courses(term_code, subject)}
 
-@app.get("/api/all-courses")
+@app.get("/api/all-courses", description="Get all courses for all subjects returned by subjects")
 def all_courses(
     term_code: str = Query(..., description="6-digit term code: 202503 for Spring 2025")
 ):
     return {"courses": get_all_courses(term_code)}
 
-@app.get("/api/subjects")
+@app.get("/api/subjects", description="Get all subjects. This is a hardcoded list for now")
 def all_subjects():
     """
     This is the hard coded list
