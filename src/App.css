@@ -17,8 +17,18 @@
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
+.scroll-container {
+  max-height: 200px;  /* Limits height to 200px */
+  overflow-y: auto;  /* Enables vertical scrolling */
+  border: 1px solid #000000;  /* Adds a border for better visibility */
+  padding: 10px;
+  width: 250px;  /* Adjust width as needed */
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Optional: subtle shadow */
+}
+
 
 .dropdown {
+  list-style-type: none;
   border: 1px solid #ffffff;
   width: 200px;
   overflow-y: auto;
