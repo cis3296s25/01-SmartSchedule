@@ -152,3 +152,4 @@ def get_all_courses(term_code: str) -> list[dict]:
             print(f"Error fetching {subject}: {e}")
 
     return all_courses
+
