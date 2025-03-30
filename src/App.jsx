@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
 
 function App() {
@@ -8,6 +8,8 @@ function App() {
   const [selectedCourses, setSelectedCourses] = useState([]);
   const [semester, setSemester] = useState('');
   const [showSemesterDropdown, setShowSemesterDropdown] = useState(false);
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const semesters = [
     "Fall 2025",
@@ -19,6 +21,7 @@ function App() {
     setSemester(sem);
     setShowSemesterDropdown(false); //close dropdown after selecting
   }
+
 
   const courseList = () => { //list to display the course list
     const [courses, setCourses] = useState([]);
@@ -70,6 +73,24 @@ function App() {
     course.toLowerCase().includes(search.toLowerCase())
   );
 
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch("http://localhost:8000/api/course-numbers?term_code=202503"); // Replace with your backend URL
+        const data = await response.json();
+        setCourses([...new Set(data.courseNumbers)]); 
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+        setMessage("⚠️ Failed to fetch courses.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCourses();
+  }, []); 
+
   return (
     <>
       <h1>SmartSchedule 📅 </h1>
@@ -115,7 +136,10 @@ function App() {
           />
           <button onClick={handleAddCourse}>Add</button>
 
-          {showDropdown && filteredCourses.length > 0 && (
+          {loading ? (
+            <p>Loading courses...</p>
+          ) : showDropdown && filteredCourses.length > 0 ? (
+          <div className = "scroll-container"> 
             <ul className="dropdown">
               {filteredCourses.map((course, index) => (
                 <li key={index} onClick={() => handleSelectCourse(course)}>
@@ -123,6 +147,9 @@ function App() {
                 </li>
               ))}
             </ul>
+          </div>
+          ) : (
+            <p>No matching courses found</p>
           )}
         </div>
 
