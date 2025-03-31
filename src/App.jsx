@@ -10,8 +10,7 @@ function App() {
   const [showSemesterDropdown, setShowSemesterDropdown] = useState(false);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  const [generate, setGenerate] = useState();
+  const [schedules, setSchedules] = useState();
 
   const handleClick = () => {
     setMessage(`Searching for: ${search}`);
@@ -92,16 +91,15 @@ function App() {
     const fetchGenerations = async () => {
       setLoading(true);
       try{
-        //use the selected courses
-        //generate
-
+        const result = generateSchedules(selectedCourses)
+        setSchedules(result);
       } catch (error) {
-        
-
+        console.error("Error generating schedules:", error);
       } finally {
         setLoading(false);
       }
     }
+    fetchGenerations();
   }
 
   return (
@@ -138,8 +136,10 @@ function App() {
           <div>
             <h3>Schedule Restrictions</h3>
           </div>
-        </div>
+          </div>
         
+
+
       
         <div>
           <h3>Available Courses</h3>
