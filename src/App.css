@@ -95,16 +95,6 @@
   column-gap: 30px;
 }
 
-.stacked {
-  /* display: auto auto auto; */
-  justify-content: center;
-  gap: 20px;
-  padding: 10px;
-  column-gap: 30px;
-  row-gap: 30px;
-
-}
-
 .container > div {
   /* background-color: #0c1b7c9e; */
   /* border: 5px solid #08346d81; */
@@ -114,6 +104,34 @@
   border-radius: 4px;
   text-align: 'center';
   flex-grow: 2;
+}
+
+/* for semester and schedule restrictions */
+.left_container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 10px;
+  column-gap: 30px;
+}
+
+.left_container > div {
+  /* background-color: #0c1b7c9e; */
+  /* border: 5px solid #08346d81; */
+  padding: 20px;
+  /* border-style: solid;
+  border-color: #ffffff; */
+  border-radius: 4px;
+  text-align: 'center';
+  flex-grow: 2;
+}
+
+.stacked {
+  display: grid;
+  justify-content: center;
+  gap: 20px;
+  padding: 10px;
+  column-gap: 30px;
 }
 
 .stacked > div {
@@ -126,7 +144,6 @@
   text-align: 'center';
   flex-grow: 2;
 }
-
 
 ul {
   list-style-type: none;  

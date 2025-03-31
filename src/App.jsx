@@ -110,36 +110,36 @@ function App() {
       <h3>Temple's Course Schedule Generator</h3>
       
       <div class="container">
+        <div class="stacked">
+          <div>
+            <h3>Semester</h3>
+            <p>Choose your semester from the dropdown below.</p>
+            
+            <input
+              type="text"
+              placeholder="Select semester"
+              value={semester}
+              onFocus={() => setShowSemesterDropdown(true)} //show dropdown on focus
+              onChange={(e) => setSemester(e.target.value)} //update semester value
+            />
+
+            {showSemesterDropdown && semesters.length > 0 && (
+              <ul className="dropdown">
+                {semesters.map((sem, index) => (
+                  <li key={index} onClick={() => handleSelectSemester(sem)}>
+                    {sem}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
         
-        <div>
-          <h3>Semester</h3>
-          <p>Choose your semester from the dropdown below.</p>
-          
-          <input
-            type="text"
-            placeholder="Select semester"
-            value={semester}
-            onFocus={() => setShowSemesterDropdown(true)} //show dropdown on focus
-            onChange={(e) => setSemester(e.target.value)} //update semester value
-          />
-
-          {showSemesterDropdown && semesters.length > 0 && (
-            <ul className="dropdown">
-              {semesters.map((sem, index) => (
-                <li key={index} onClick={() => handleSelectSemester(sem)}>
-                  {sem}
-                </li>
-              ))}
-            </ul>
-          )}
+          <div>
+            <h3>Schedule Restrictions</h3>
+          </div>
         </div>
-
-      
-        <div>
-          <h3>Schedule Restrictions</h3>
-        </div>
-
-
+        
       
         <div>
           <h3>Available Courses</h3>
