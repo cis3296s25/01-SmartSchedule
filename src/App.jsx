@@ -11,6 +11,8 @@ function App() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const [generate, setGenerate] = useState();
+
   const handleClick = () => {
     setMessage(`Searching for: ${search}`);
   };
@@ -78,7 +80,7 @@ function App() {
         setCourses([...new Set(data.courseNumbers)]); 
       } catch (error) {
         console.error("Error fetching courses:", error);
-        setMessage("⚠️ Failed to fetch courses.");
+        // setMessage("⚠️ Failed to fetch courses.");
       } finally {
         setLoading(false);
       }
@@ -86,12 +88,29 @@ function App() {
     fetchCourses();
   }, []); 
 
+  const handleGeneration = () => {
+    const fetchGenerations = async () => {
+      setLoading(true);
+      try{
+        //use the selected courses
+        //generate
+
+      } catch (error) {
+        
+
+      } finally {
+        setLoading(false);
+      }
+    }
+  }
+
   return (
     <>
       <h1>SmartSchedule 📅 </h1>
       <h3>Temple's Course Schedule Generator</h3>
-
+      
       <div class="container">
+        
         <div>
           <h3>Semester</h3>
           <p>Choose your semester from the dropdown below.</p>
@@ -115,6 +134,13 @@ function App() {
           )}
         </div>
 
+      
+        <div>
+          <h3>Schedule Restrictions</h3>
+        </div>
+
+
+      
         <div>
           <h3>Available Courses</h3>
           <input
@@ -130,7 +156,7 @@ function App() {
             <p>Loading courses...</p>
           ) : showDropdown && filteredCourses.length > 0 ? (
           <div className = "scroll-container"> 
-            <ul className="dropdown">
+            <ul className="container">
               {filteredCourses.map((course, index) => (
                 <li key={index} onClick={() => handleSelectCourse(course)}>
                   {course}
@@ -158,25 +184,24 @@ function App() {
               </ul>
               <button onClick={handleClearCourses}>Clear All</button>
             </>
-          )}
-        </div>
-
-        
-
-        <div>
-          <h3>Schedule Restrictions</h3>
-        </div>
-      </div>
-
-      <div style={{ marginTop: '1rem' }}>
+          )} 
+        <div style={{ marginTop: '1rem' }}>
           <button onClick={saveSchedule}>💾 Save Schedule</button>
+        </div>
+
+        <div style={{ marginTop: '0.5rem' }}>
           <button onClick={loadSchedule}>📂 Load Schedule</button>
           {message && <p>{message}</p>}
         </div>
         
+        </div>
+      </div>
+
+      <button onClick={handleGeneration}>Generate Schedules</button>
+
       <div class="container">
         <div>
-          <h3> Generated Schedules </h3>
+          <h3> Schedules </h3>
 
         </div>
       </div>
