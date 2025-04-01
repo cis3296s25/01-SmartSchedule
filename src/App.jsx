@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import './App.css';
+
 import SemesterSelector from './components/SemesterSelector';
 import CourseSearch from './components/CourseSearch';
 import SelectedCourses from './components/SelectedCourses';
@@ -14,7 +16,9 @@ function App() {
   const [semester, setSemester] = useState('');
   const [showSemesterDropdown, setShowSemesterDropdown] = useState(false);
   const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loadingCourses, setLoadingCourses] = useState(false);
+  const [loadingSchedules, setLoadingSchedules] = useState(false);
+  const [schedule, setSchedule] = useState({});
 
   const handleClick = () => {
     setMessage(`Searching for: ${search}`);
@@ -63,26 +67,39 @@ function App() {
     }
   };
 
-  const filteredCourses = courses.filter((course) =>
+  const filteredCourses = courses.filter(course =>
       course.toLowerCase().includes(search.toLowerCase())
   );
 
   useEffect(() => {
     const fetchCourses = async () => {
-      setLoading(true);
+      setLoadingCourses(true);
       try {
         const response = await fetch("http://localhost:8000/api/course-numbers?term_code=202503");
         const data = await response.json();
         setCourses([...new Set(data.courseNumbers)]);
       } catch (error) {
         console.error("Error fetching courses:", error);
-        setMessage("⚠️ Failed to fetch courses.");
       } finally {
-        setLoading(false);
+        setLoadingCourses(false);
       }
     };
     fetchCourses();
   }, []);
+
+  const handleGeneration = async () => {
+    setLoadingSchedules(true);
+    try {
+      const response = await axios.post("http://localhost:8000/api/generate", {
+        courses: selectedCourses,
+      });
+      setSchedule(response.data);
+    } catch (error) {
+      console.error("Error generating schedules:", error);
+    } finally {
+      setLoadingSchedules(false);
+    }
+  };
 
   return (
       <>
@@ -90,50 +107,53 @@ function App() {
         <h3>Temple's Course Schedule Generator</h3>
 
         <div className="container">
-          <SemesterSelector
-              semester={semester}
-              semesters={semesters}
-              showSemesterDropdown={showSemesterDropdown}
-              setSemester={setSemester}
-              setShowSemesterDropdown={setShowSemesterDropdown}
-              handleSelectSemester={handleSelectSemester}
-          />
+          <div className="stacked">
+            <SemesterSelector
+                semester={semester}
+                setSemester={setSemester}
+                showSemesterDropdown={showSemesterDropdown}
+                setShowSemesterDropdown={setShowSemesterDropdown}
+                semesters={semesters}
+                handleSelectSemester={handleSelectSemester}
+            />
+            <ScheduleRestrictions />
+          </div>
 
           <CourseSearch
               search={search}
               setSearch={setSearch}
-              handleClick={handleClick}
-              handleAddCourse={handleAddCourse}
               showDropdown={showDropdown}
               setShowDropdown={setShowDropdown}
+              courses={courses}
               filteredCourses={filteredCourses}
+              loadingCourses={loadingCourses}
+              handleClick={handleClick}
               handleSelectCourse={handleSelectCourse}
-              loading={loading}
+              handleAddCourse={handleAddCourse}
           />
 
           <SelectedCourses
               selectedCourses={selectedCourses}
               handleRemoveCourse={handleRemoveCourse}
               handleClearCourses={handleClearCourses}
+              saveSchedule={saveSchedule}
+              loadSchedule={loadSchedule}
+              message={message}
           />
-
-          <ScheduleRestrictions />
         </div>
 
-        <div style={{ marginTop: '1rem' }}>
-          <button onClick={saveSchedule}>💾 Save Schedule</button>
-          <button onClick={loadSchedule}>📂 Load Schedule</button>
-          {message && <p>{message}</p>}
-        </div>
+        <button onClick={handleGeneration} disabled={loadingSchedules}>
+          {loadingSchedules ? "Generating..." : "Generate Schedules"}
+        </button>
 
-        <div className="container">
-          <GeneratedSchedules />
-        </div>
+        <GeneratedSchedules schedule={schedule} />
       </>
   );
 }
 
 export default App;
+
+
 
 
 

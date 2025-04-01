@@ -1,7 +1,9 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List
+from typing import List, Dict
+from pydantic import BaseModel
 from utils.fetch import fetch_courses, get_all_courses, get_all_subjects
+from utils.algorithm import generateSchedules
 
 app = FastAPI()
 
@@ -47,3 +49,32 @@ def course_numbers(
     return {"courseNumbers": unique_course_numbers}
 
 
+# structure of a course and the request body
+class MeetingTime(BaseModel):
+    start: str          # e.g. "0900"
+    end: str            # e.g. "1050"
+    days: List[str]     # e.g. ["monday", "wednesday"]
+    type: str           # e.g. "Lecture", "Lab"
+
+
+class Course(BaseModel):
+    code: str           # e.g. "CIS 1051"
+    title: str          # e.g. "Intro to Programming"
+    CRN: str            # e.g. "21910"
+    professor: str      # e.g. "Andrew Rosen"
+    creditHours: int    # e.g. 4
+    meetingTimes: List[MeetingTime]
+
+
+class CourseRequest(BaseModel):
+    courses: List[Course]
+
+@app.post("/api/generate")
+def generate_schedule(data: CourseRequest):
+    """
+    Accepts a list of course dictionaries and returns a generated schedule
+    """
+    if not data.courses:
+        return {"error": "No courses provided"}
+    course_dicts = [course.dict() for course in data.courses]
+    return generateSchedules(course_dicts)
