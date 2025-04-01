@@ -1,8 +1,13 @@
-import { useState, useEffect } from 'react'
-import './App.css'
+import { useState, useEffect } from 'react';
+import './App.css';
+import SemesterSelector from './components/SemesterSelector';
+import CourseSearch from './components/CourseSearch';
+import SelectedCourses from './components/SelectedCourses';
+import ScheduleRestrictions from './components/ScheduleRestrictions';
+import GeneratedSchedules from './components/GeneratedSchedules';
 
 function App() {
-  const [search, setSearch] = useState(''); 
+  const [search, setSearch] = useState('');
   const [message, setMessage] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [selectedCourses, setSelectedCourses] = useState([]);
@@ -15,23 +20,17 @@ function App() {
     setMessage(`Searching for: ${search}`);
   };
 
-
-  const semesters = [
-    "Fall 2025",
-    "Spring 2025",
-    "Fall 2024"
-  ]
+  const semesters = ["Fall 2025", "Spring 2025", "Fall 2024"];
 
   const handleSelectSemester = (sem) => {
     setSemester(sem);
-    setShowSemesterDropdown(false); //close dropdown after selecting
-  }
+    setShowSemesterDropdown(false);
+  };
 
-  
   const handleSelectCourse = (course) => {
     setSearch(course);
     setShowDropdown(false);
-  }
+  };
 
   const handleAddCourse = () => {
     if (search && !selectedCourses.includes(search)) {
@@ -39,11 +38,11 @@ function App() {
       setSearch('');
       setShowDropdown(false);
     }
-  }
+  };
 
   const handleRemoveCourse = (course) => {
     setSelectedCourses(selectedCourses.filter(item => item !== course));
-  }
+  };
 
   const handleClearCourses = () => {
     setSelectedCourses([]);
@@ -65,17 +64,16 @@ function App() {
   };
 
   const filteredCourses = courses.filter((course) =>
-    course.toLowerCase().includes(search.toLowerCase())
+      course.toLowerCase().includes(search.toLowerCase())
   );
-
 
   useEffect(() => {
     const fetchCourses = async () => {
       setLoading(true);
       try {
-        const response = await fetch("http://localhost:8000/api/course-numbers?term_code=202503"); // Replace with your backend URL
+        const response = await fetch("http://localhost:8000/api/course-numbers?term_code=202503");
         const data = await response.json();
-        setCourses([...new Set(data.courseNumbers)]); 
+        setCourses([...new Set(data.courseNumbers)]);
       } catch (error) {
         console.error("Error fetching courses:", error);
         setMessage("⚠️ Failed to fetch courses.");
@@ -84,104 +82,58 @@ function App() {
       }
     };
     fetchCourses();
-  }, []); 
+  }, []);
 
   return (
-    <>
-      <h1>SmartSchedule 📅 </h1>
-      <h3>Temple's Course Schedule Generator</h3>
+      <>
+        <h1>SmartSchedule 📅</h1>
+        <h3>Temple's Course Schedule Generator</h3>
 
-      <div class="container">
-        <div>
-          <h3>Semester</h3>
-          <p>Choose your semester from the dropdown below.</p>
-          
-          <input
-            type="text"
-            placeholder="Select semester"
-            value={semester}
-            onFocus={() => setShowSemesterDropdown(true)} //show dropdown on focus
-            onChange={(e) => setSemester(e.target.value)} //update semester value
+        <div className="container">
+          <SemesterSelector
+              semester={semester}
+              semesters={semesters}
+              showSemesterDropdown={showSemesterDropdown}
+              setSemester={setSemester}
+              setShowSemesterDropdown={setShowSemesterDropdown}
+              handleSelectSemester={handleSelectSemester}
           />
 
-          {showSemesterDropdown && semesters.length > 0 && (
-            <ul className="dropdown">
-              {semesters.map((sem, index) => (
-                <li key={index} onClick={() => handleSelectSemester(sem)}>
-                  {sem}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        <div>
-          <h3>Available Courses</h3>
-          <input
-            type="text"
-            placeholder="Search for Course..."
-            value={search}
-            onFocus={() => setShowDropdown(true)}
-            onChange={(e) => setSearch(e.target.value)}
+          <CourseSearch
+              search={search}
+              setSearch={setSearch}
+              handleClick={handleClick}
+              handleAddCourse={handleAddCourse}
+              showDropdown={showDropdown}
+              setShowDropdown={setShowDropdown}
+              filteredCourses={filteredCourses}
+              handleSelectCourse={handleSelectCourse}
+              loading={loading}
           />
-          <button onClick={handleAddCourse}>Add</button>
 
-          {loading ? (
-            <p>Loading courses...</p>
-          ) : showDropdown && filteredCourses.length > 0 ? (
-          <div className = "scroll-container"> 
-            <ul className="dropdown">
-              {filteredCourses.map((course, index) => (
-                <li key={index} onClick={() => handleSelectCourse(course)}>
-                  {course}
-                </li>
-              ))}
-            </ul>
-          </div>
-          ) : (
-            <p>No matching courses found</p>
-          )}
+          <SelectedCourses
+              selectedCourses={selectedCourses}
+              handleRemoveCourse={handleRemoveCourse}
+              handleClearCourses={handleClearCourses}
+          />
+
+          <ScheduleRestrictions />
         </div>
 
-        <div>
-          <h3>Selected Courses</h3>
-          {selectedCourses.length === 0 ? (
-            <p>No courses selected</p>
-          ) : (
-            <>
-              <ul>
-                {selectedCourses.map((course, index) => (
-                  <li key={index}>
-                    {course} <button onClick={() => handleRemoveCourse(course)}>Remove</button>
-                  </li>
-                ))}
-              </ul>
-              <button onClick={handleClearCourses}>Clear All</button>
-            </>
-          )}
-        </div>
-
-        
-
-        <div>
-          <h3>Schedule Restrictions</h3>
-        </div>
-      </div>
-
-      <div style={{ marginTop: '1rem' }}>
+        <div style={{ marginTop: '1rem' }}>
           <button onClick={saveSchedule}>💾 Save Schedule</button>
           <button onClick={loadSchedule}>📂 Load Schedule</button>
           {message && <p>{message}</p>}
         </div>
-        
-      <div class="container">
-        <div>
-          <h3> Generated Schedules </h3>
 
+        <div className="container">
+          <GeneratedSchedules />
         </div>
-      </div>
-    </>
+      </>
   );
 }
 
 export default App;
+
+
+
