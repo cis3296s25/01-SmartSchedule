@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import './App.css'
+import axios from "axios";
+
 
 function App() {
   const [search, setSearch] = useState(''); 
@@ -9,10 +11,12 @@ function App() {
   const [semester, setSemester] = useState('');
   const [showSemesterDropdown, setShowSemesterDropdown] = useState(false);
   const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [schedules, setSchedules] = useState([]);
-  
-  
+  const [loadingCourses, setLoadingCourses] = useState(false);
+  const [loadingSchedules, setLoadingSchedules] = useState(false);
+
+  const [schedule, setSchedule] = useState({});
+
+
 
   const handleClick = () => {
     setMessage(`Searching for: ${search}`);
@@ -74,7 +78,7 @@ function App() {
 
   useEffect(() => {
     const fetchCourses = async () => {
-      setLoading(true);
+      setLoadingCourses(true);
       try {
         const response = await fetch("http://localhost:8000/api/course-numbers?term_code=202503"); // Replace with your backend URL
         const data = await response.json();
@@ -83,21 +87,22 @@ function App() {
         console.error("Error fetching courses:", error);
         // setMessage("⚠️ Failed to fetch courses.");
       } finally {
-        setLoading(false);
+        setLoadingCourses(false);
       }
     };
     fetchCourses();
   }, []); 
 
-  const handleGenerate = async () => {
-    setLoading(true);
+  const handleGeneration = async () => {
+    setLoadingSchedules(true);
     try {
-      
-      setSchedules(response.data); // Update state with received schedules
+      const response = await axios.post("http://127.0.0.1:5000/generate_schedules", { courses: selectedCourses });
+      setSchedule(response.data);
     } catch (error) {
       console.error("Error generating schedules:", error);
+    } finally {
+      setLoadingSchedules(false);
     }
-    setLoading(false);
   };
   
 
@@ -149,7 +154,7 @@ function App() {
           />
           <button onClick={handleAddCourse}>Add</button>
 
-          {loading ? (
+          {loadingCourses ? (
             <p>Loading courses...</p>
           ) : showDropdown && filteredCourses.length > 0 ? (
           <div className = "scroll-container"> 
@@ -194,17 +199,37 @@ function App() {
         </div>
       </div>
 
-      {/* <button onClick={handleGeneration} disabled={loading}>
-        {loading ? "Generating..." : "Generate Schedules"}
-      </button> */}
+      <button onClick={handleGeneration} disabled={loadingSchedules}>
+        {loadingSchedules ? "Generating..." : "Generate Schedules"}
+      </button>
 
       <div class="container">
         <div>
           <h3> Schedules </h3>
-          <ul>
-            
-          </ul>
-
+          <div className="w-full">
+            {Object.keys(schedule).length > 0 ? (
+              <div className="grid gap-4">
+                {Object.entries(schedule).map(([day, classes]) => (
+                  <div key={day} className="p-4 border rounded-lg shadow-md">
+                    <h3 className="font-bold capitalize">{day}:</h3>
+                    <ul>
+                      {classehs.length > 0 ? (
+                        classes.map((cls, index) => (
+                          <li key={index} className="mt-2">
+                            <strong>{cls.code}</strong> - {cls.title} ({cls.start}-{cls.end}) with {cls.professor}
+                          </li>
+                        ))
+                      ) : (
+                        <p>No classes scheduled.</p>
+                      )}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500">No schedule generated yet.</p>
+            )}
+          </div>
         </div>
       </div>
     </>
