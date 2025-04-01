@@ -114,7 +114,6 @@
   justify-content: center;
   gap: 20px;
   padding: 10px;
-  /* column-gap: 30px; */
 }
 
 .stacked > div {

@@ -1,4 +1,4 @@
-def sift_sections(courses):
+def generateSchedules(courses):
     input_courses = courses.copy()
     ret_schedules = {}
     proposed_schedule = {}
@@ -130,4 +130,4 @@ courses = [
     }
 ]
 
-print("\nOutput: " + str(sift_sections(courses)))
+print("\nOutput: " + str(generateSchedules(courses)))

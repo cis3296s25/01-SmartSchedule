@@ -10,7 +10,9 @@ function App() {
   const [showSemesterDropdown, setShowSemesterDropdown] = useState(false);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [schedules, setSchedules] = useState();
+  const [schedules, setSchedules] = useState([]);
+  
+  
 
   const handleClick = () => {
     setMessage(`Searching for: ${search}`);
@@ -87,20 +89,17 @@ function App() {
     fetchCourses();
   }, []); 
 
-  const handleGeneration = () => {
-    const fetchGenerations = async () => {
-      setLoading(true);
-      try{
-        const result = generateSchedules(selectedCourses)
-        setSchedules(result);
-      } catch (error) {
-        console.error("Error generating schedules:", error);
-      } finally {
-        setLoading(false);
-      }
+  const handleGenerate = async () => {
+    setLoading(true);
+    try {
+      
+      setSchedules(response.data); // Update state with received schedules
+    } catch (error) {
+      console.error("Error generating schedules:", error);
     }
-    fetchGenerations();
-  }
+    setLoading(false);
+  };
+  
 
   return (
     <>
@@ -127,20 +126,18 @@ function App() {
                   <li key={index} onClick={() => handleSelectSemester(sem)}>
                     {sem}
                   </li>
+
                 ))}
               </ul>
             )}
           </div>
 
-        
           <div>
             <h3>Schedule Restrictions</h3>
           </div>
           </div>
-        
-
-
       
+
         <div>
           <h3>Available Courses</h3>
           <input
@@ -156,7 +153,7 @@ function App() {
             <p>Loading courses...</p>
           ) : showDropdown && filteredCourses.length > 0 ? (
           <div className = "scroll-container"> 
-            <ul className="container">
+            <ul className="dropdown">
               {filteredCourses.map((course, index) => (
                 <li key={index} onClick={() => handleSelectCourse(course)}>
                   {course}
@@ -197,11 +194,16 @@ function App() {
         </div>
       </div>
 
-      <button onClick={handleGeneration}>Generate Schedules</button>
+      {/* <button onClick={handleGeneration} disabled={loading}>
+        {loading ? "Generating..." : "Generate Schedules"}
+      </button> */}
 
       <div class="container">
         <div>
           <h3> Schedules </h3>
+          <ul>
+            
+          </ul>
 
         </div>
       </div>
