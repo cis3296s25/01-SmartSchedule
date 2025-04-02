@@ -15,6 +15,8 @@ function App() {
   const [loadingCourses, setLoadingCourses] = useState(false);
   const [loadingSchedules, setLoadingSchedules] = useState(false);
   const [schedule, setSchedule] = useState({});
+  const schedulerContainerRef = useRef(null);
+
 
   const handleClick = () => {
     setMessage(`Searching for: ${search}`);
@@ -24,17 +26,14 @@ function App() {
 
   const handleSelectSemester = (sem) => {
     setSemester(sem);
-    setShowSemesterDropdown(false);
-  };
-
     setShowSemesterDropdown(false); //close dropdown after selecting
-  }
+  };
 
 
   const handleSelectCourse = (course) => {
     setSearch(course);
     setShowDropdown(false);
-  };;
+  };
 
   const handleAddCourse = () => {
     if (search && !selectedCourses.includes(search)) {
@@ -43,12 +42,12 @@ function App() {
       setShowDropdown(false);
     }
   };
-  };
+  
 
   const handleRemoveCourse = (course) => {
     setSelectedCourses(selectedCourses.filter(item => item !== course));
   };
-  };
+  
 
   const handleClearCourses = () => {
     setSelectedCourses([]);
@@ -133,8 +132,8 @@ function App() {
       <h1>SmartSchedule 📅</h1>
       <h3>Temple's Course Schedule Generator</h3>
 
-      <div class="container">
-        <div class="stacked">
+      <div className="container">
+        <div clasName="stacked">
           <div>
             <h3>Semester</h3>
             <p>Choose your semester from the dropdown below.</p>
@@ -224,8 +223,13 @@ function App() {
       <button onClick={handleGeneration} disabled={loadingSchedules}>
         {loadingSchedules ? "Generating..." : "Generate Schedules"}
       </button>
+      
+      <div
+        ref={schedulerContainerRef}
+        style={{ width: "100%", height: "600px", marginTop: "2rem" }}
+      ></div>
 
-      <div class="container">
+      <div className="container">
         <div>
           <h3> Schedules </h3>
           <div className="w-full">
@@ -257,9 +261,6 @@ function App() {
     </>
   );
 
-
+}
 export default App;
-
-
-
 
