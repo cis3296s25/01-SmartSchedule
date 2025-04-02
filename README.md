@@ -20,6 +20,7 @@
     ```
     npm run dev
     ```
+3. Wait up to 5 minutes for the courses to succesfully load onto the screen.
  
 ---
 
