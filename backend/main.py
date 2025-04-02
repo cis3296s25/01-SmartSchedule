@@ -1,22 +1,40 @@
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
+from pydantic import BaseModel
+from utils.algorithm import generateSchedules
 from utils.fetch import fetch_courses, get_all_courses, get_all_subjects
 
 app = FastAPI()
 
-# allow requests from frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # replace w frontend url
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+class MeetingTime(BaseModel):
+    start: str
+    end: str
+    days: List[str]
+    type: str
+
+class Course(BaseModel):
+    code: str
+    title: str
+    CRN: str
+    professor: str
+    creditHours: int
+    meetingTimes: List[MeetingTime]
+
+class CourseRequest(BaseModel):
+    courses: List[Course]
+
 @app.get("/")
 def root():
-    return {"message": "SmartSchedule backend is running "}
+    return {"message": "SmartSchedule backend is running"}
 
 @app.get("/api/subject/courses", description="Get all courses for a specific subject")
 def courses_for_subject(
@@ -33,9 +51,6 @@ def all_courses(
 
 @app.get("/api/subjects", description="Get all subjects. This is a hardcoded list for now")
 def all_subjects():
-    """
-    This is the hard coded list
-    """
     return {"subjects": get_all_subjects()}
 
 @app.get("/api/course-numbers", description="Get all course numbers from all courses")
@@ -46,4 +61,8 @@ def course_numbers(
     unique_course_numbers = sorted(set(course["code"] for course in all_courses))  # Extract just the course numbers
     return {"courseNumbers": unique_course_numbers}
 
-
+@app.post("/api/generate", description="Generate schedules based on class information")
+def generate_schedule(data: CourseRequest):
+    if not data.courses:
+        return {"error": "No courses provided"}
+    return generateSchedules([course.dict() for course in data.courses])
