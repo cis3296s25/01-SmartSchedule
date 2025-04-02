@@ -90,34 +90,85 @@ function App() {
   }, []);
 
   // DHTMLX Scheduler setup
+ 
   useEffect(() => {
-    if (!scheduler || !scheduler.init) return;
+    if (!scheduler || !scheduler.init || !schedulerContainerRef.current) return;
 
     scheduler.init(schedulerContainerRef.current, new Date(), "week");
 
-    // Whenever selectedCourses changes, update the events
-    const now = new Date();
-    const events = selectedCourses.map((course, i) => {
-      const dayOffset = i % 5;
-      const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() + dayOffset, 9, 0);
-      const end = new Date(start.getTime() + 60 * 60 * 1000); // 1 hour later
-      return {
-        id: i,
-        text: course,
-        start_date: start,
-        end_date: end
-      };
+    if (!schedule || Object.keys(schedule).length === 0) return;
+
+    const eventList = [];
+    let eventId = 1;
+
+    Object.values(schedule).forEach((scheduleItem) => {
+      Object.values(scheduleItem).forEach((course) => {
+        course.meetingTimes.forEach((mt) => {
+          mt.days.forEach((day) => {
+            // Map day name to JS Date index (0 = Sunday, 1 = Monday, ...)
+            const dayMap = {
+              monday: 1,
+              tuesday: 2,
+              wednesday: 3,
+              thursday: 4,
+              friday: 5,
+            };
+
+            const startHour = parseInt(mt.start.substring(0, 2), 10);
+            const startMin = parseInt(mt.start.substring(2), 10);
+            const endHour = parseInt(mt.end.substring(0, 2), 10);
+            const endMin = parseInt(mt.end.substring(2), 10);
+
+            const now = new Date();
+            const eventStart = new Date(now.setDate(now.getDate() - now.getDay() + dayMap[day]));
+            eventStart.setHours(startHour, startMin);
+
+            const eventEnd = new Date(eventStart);
+            eventEnd.setHours(endHour, endMin);
+
+            eventList.push({
+              id: eventId++,
+              text: `${course.code} - ${course.title}`,
+              start_date: eventStart,
+              end_date: eventEnd,
+            });
+          });
+        });
+      });
     });
 
     scheduler.clearAll();
-    scheduler.parse(events, "json");
-  }, [selectedCourses]);
-
+    scheduler.parse(eventList, "json");
+  }, [schedule]);
 
   const handleGeneration = async () => {
     setLoadingSchedules(true);
+  
     try {
-      const response = await axios.post("http://127.0.0.1:5000/generate_schedules", { courses: selectedCourses });
+      const termCode = "202503";
+      const fullCourses = [];
+  
+      for (let code of selectedCourses) {
+        const [subject, courseNumber] = code.split(" ");
+        const res = await axios.get("http://localhost:8000/api/subject/courses", {
+          params: {
+            subject,
+            term_code: termCode
+          }
+        });
+  
+        // Find matching course
+        const matching = res.data.courses.find((c) => c.code === code);
+        if (matching) {
+          fullCourses.push(matching);
+        }
+      }
+  
+      const response = await axios.post("http://localhost:8000/api/generate", {
+        courses: fullCourses
+      });
+  
+      console.log("✅ Schedules:", response.data);
       setSchedule(response.data);
     } catch (error) {
       console.error("Error generating schedules:", error);
@@ -125,7 +176,7 @@ function App() {
       setLoadingSchedules(false);
     }
   };
-
+ 
 
   return (
     <>
@@ -133,7 +184,7 @@ function App() {
       <h3>Temple's Course Schedule Generator</h3>
 
       <div className="container">
-        <div clasName="stacked">
+        <div className="stacked">
           <div>
             <h3>Semester</h3>
             <p>Choose your semester from the dropdown below.</p>
