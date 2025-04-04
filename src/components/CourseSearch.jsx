@@ -26,30 +26,29 @@ function CourseSearch({ selectedCourses, setSelectedCourses, message, setMessage
         fetchSubjects();
     }, []);
 
-    useEffect(() => {
-        const fetchCourses = async () => {
-            if (!selectedSubjectCode) {
-                setCourses([]);
-                return;
-            }
-
-            setLoadingCourses(true);
-            try {
-                const url = `http://localhost:8000/api/subject/courses?term_code=${termCode}&subject=${selectedSubjectCode}`;
+    const fetchCourses = async (subjectCode = '') => {
+        setLoadingCourses(true);
+        setShowCourseDropdown(true); // Open immediately on subject selection
+        try {
+            let url;
+            if (!subjectCode) {
+                url = `http://localhost:8000/api/course-numbers?term_code=${termCode}`;
                 const res = await fetch(url);
                 const data = await res.json();
-                const courseList = [...new Set(data.courses.map((c) => c.code))];
-                setCourses(courseList);
-            } catch (err) {
-                console.error("Failed to fetch courses", err);
-                setCourses([]);
-            } finally {
-                setLoadingCourses(false);
+                setCourses([...new Set(data.courseNumbers)]);
+            } else {
+                url = `http://localhost:8000/api/subject/courses?term_code=${termCode}&subject=${subjectCode}`;
+                const res = await fetch(url);
+                const data = await res.json();
+                setCourses([...new Set(data.courses.map(c => c.code))]);
             }
-        };
-
-        fetchCourses();
-    }, [selectedSubjectCode]);
+        } catch (err) {
+            console.error("Failed to fetch courses", err);
+            setCourses([]);
+        } finally {
+            setLoadingCourses(false);
+        }
+    };
 
     const handleSelectCourse = (course) => {
         setSearch(course);
@@ -67,20 +66,37 @@ function CourseSearch({ selectedCourses, setSelectedCourses, message, setMessage
 
     const filterSubjects = (query) => {
         const lower = query.toLowerCase();
-        return subjects.filter(
-            (s) =>
-                s.code.toLowerCase().includes(lower) ||
-                s.description.toLowerCase().includes(lower)
+        return subjects.filter(s =>
+            s.code.toLowerCase().includes(lower) ||
+            s.description.toLowerCase().includes(lower)
         );
     };
 
     const handleSubjectClick = () => {
-        // Reset everything on click
         setShowSubjectDropdown(true);
-        setSelectedSubject('');
+        // reset it when the input is clicked again
+        if (selectedSubjectCode) {
+            setSelectedSubject('');
+            setSelectedSubjectCode('');
+            setCourses([]);
+            setSearch('');
+        }
+    };
+
+    const handleSubjectChange = (e) => {
+        const input = e.target.value;
+        setSelectedSubject(input);
         setSelectedSubjectCode('');
         setCourses([]);
+        setShowSubjectDropdown(true);
+    };
+
+    const handleSubjectSelect = (subj) => {
+        setSelectedSubject(subj.description);
+        setSelectedSubjectCode(subj.code);
+        setShowSubjectDropdown(false);
         setSearch('');
+        fetchCourses(subj.code); // auto-fetch and show course dropdown
     };
 
     return (
@@ -95,23 +111,15 @@ function CourseSearch({ selectedCourses, setSelectedCourses, message, setMessage
                 value={selectedSubject}
                 onClick={handleSubjectClick}
                 onFocus={handleSubjectClick}
-                onChange={(e) => {
-                    setSelectedSubject(e.target.value);
-                    setSelectedSubjectCode('');
-                    setCourses([]);
-                }}
+                onChange={handleSubjectChange}
             />
-            {showSubjectDropdown && subjects.length > 0 && (
+            {showSubjectDropdown && (
                 <div className="scroll-container">
                     <ul className="dropdown">
                         {filterSubjects(selectedSubject).map((subj, idx) => (
                             <li
                                 key={idx}
-                                onClick={() => {
-                                    setSelectedSubject(subj.description);
-                                    setSelectedSubjectCode(subj.code);
-                                    setShowSubjectDropdown(false);
-                                }}
+                                onClick={() => handleSubjectSelect(subj)}
                             >
                                 {subj.description}
                             </li>
@@ -126,19 +134,26 @@ function CourseSearch({ selectedCourses, setSelectedCourses, message, setMessage
                 type="text"
                 placeholder="Search for Course..."
                 value={search}
-                onFocus={() => setShowCourseDropdown(true)}
+                onFocus={() => {
+                    setShowCourseDropdown(true);
+                    if (!selectedSubjectCode && courses.length === 0) {
+                        fetchCourses(""); // Load all courses
+                    }
+                }}
                 onChange={(e) => setSearch(e.target.value)}
             />
 
             <button onClick={handleAddCourse}>Add</button>
 
-            {loadingCourses ? (
-                <p>Loading courses...</p>
+            {showCourseDropdown && loadingCourses ? (
+                <p>{selectedSubjectCode ? "Loading courses..." : "Loading all courses..."} 🔄</p>
             ) : showCourseDropdown && courses.length > 0 ? (
                 <div className="scroll-container">
                     <ul className="dropdown">
                         {courses
-                            .filter((course) => course.toLowerCase().includes(search.toLowerCase()))
+                            .filter(course =>
+                                course.toLowerCase().includes(search.toLowerCase())
+                            )
                             .map((course, index) => (
                                 <li key={index} onClick={() => handleSelectCourse(course)}>
                                     {course}
@@ -147,16 +162,16 @@ function CourseSearch({ selectedCourses, setSelectedCourses, message, setMessage
                     </ul>
                 </div>
             ) : (
-                showCourseDropdown &&
-                selectedSubjectCode && // Only show 'No matching courses' if subject selected
-                !loadingCourses &&
-                courses.length === 0 && <p>No matching courses found</p>
+                showCourseDropdown && !loadingCourses && <p>No matching courses found</p>
             )}
-
         </div>
     );
 }
 
 export default CourseSearch;
+
+
+
+
 
 

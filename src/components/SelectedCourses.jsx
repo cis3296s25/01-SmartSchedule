@@ -1,12 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
-function SelectedCourses({ onSelectedCoursesChange }) {
-    const [selectedCourses, setSelectedCourses] = useState([]);
+function SelectedCourses({ selectedCourses, setSelectedCourses }) {
     const [message, setMessage] = useState('');
-
-    useEffect(() => {
-        onSelectedCoursesChange(selectedCourses); // Notify parent when selectedCourses change
-    }, [selectedCourses]);
 
     const handleRemoveCourse = (course) => {
         setSelectedCourses((prev) => prev.filter((item) => item !== course));
@@ -56,11 +51,10 @@ function SelectedCourses({ onSelectedCoursesChange }) {
                 <button onClick={loadSchedule}>📂 Load Schedule</button>
                 {message && <p>{message}</p>}
             </div>
-
         </div>
-
     );
 }
 
 export default SelectedCourses;
+
 

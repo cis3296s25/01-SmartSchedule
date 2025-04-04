@@ -70,7 +70,10 @@ function App() {
             setMessage={setMessage}
         />
 
-        <SelectedCourses onSelectedCoursesChange={setSelectedCourses} />
+        <SelectedCourses
+            selectedCourses={selectedCourses}
+            setSelectedCourses={setSelectedCourses}
+        />
 
       </div>
 
