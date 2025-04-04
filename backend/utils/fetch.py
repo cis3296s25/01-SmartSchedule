@@ -1,14 +1,44 @@
 import requests
 import time
 
-def get_all_subjects() -> list[str]:
+def get_all_subjects(term_code) -> list[str]:
     """
     Had to change to return hard coded list since endpoint was not working
     """
-    return [
-        "CIS", "MATH", "BIOL", "CHEM", "PHYS", "STAT", "ENG", "PHIL",
-        "ECON", "PSY", "SOC", "SPAN", "ITAL", "HIST", "ART", "ENGL", "EES"
-    ]
+    try:
+        session = requests.Session()
+
+        # establish session
+        session.get("https://prd-xereg.temple.edu/StudentRegistrationSsb/ssb/classSearch/classSearch")
+
+        # make the subject list request
+        params = {
+            "searchTerm": "",
+            "term": term_code,
+            "offset": 1,
+            "max": 999
+        }
+
+        headers = {
+            "Accept": "application/json",
+            "Referer": "https://prd-xereg.temple.edu/StudentRegistrationSsb/ssb/classSearch/classSearch",
+            "User-Agent": "Mozilla/5.0"
+        }
+
+        response = session.get(
+            "https://prd-xereg.temple.edu/StudentRegistrationSsb/ssb/classSearch/get_subject",
+            headers=headers,
+            params=params
+        )
+
+        response.raise_for_status()
+        subjects = response.json()
+
+        return sorted(subjects, key=lambda s: s["code"])  # preserve code and description
+
+    except Exception as e:
+        print(f"[ERROR] Failed to fetch subjects: {e}")
+        return []
 
 
 def fetch_courses(term_code: str, subject: str) -> list[dict]:
