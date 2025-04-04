@@ -169,17 +169,18 @@ def get_all_courses(term_code: str) -> list[dict]:
       }...
     """
     all_courses = []
-    subjects = get_all_subjects()
+    subjects = get_all_subjects(term_code)
 
     # for each subject in the list, call fetch courses to get all courses from all subjects
     for subject in subjects:
-        print(f"Fetching courses for subject: {subject}")
+        subject_code = subject["code"]
+        print(f"Fetching courses for subject: {subject_code}")
         try:
-            courses = fetch_courses(term_code, subject)
+            courses = fetch_courses(term_code, subject_code)
             all_courses.extend(courses)
             time.sleep(0.3)  # avoid getting blocked
         except Exception as e:
-            print(f"Error fetching {subject}: {e}")
+            print(f"Error fetching {subject_code}: {e}")
 
     return all_courses
 
