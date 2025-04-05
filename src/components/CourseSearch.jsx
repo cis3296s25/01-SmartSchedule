@@ -104,7 +104,7 @@ function CourseSearch({ selectedCourses, setSelectedCourses, message, setMessage
             <h3>Available Courses</h3>
 
             {/* Subject Dropdown */}
-            <label><strong>Subject:</strong></label>
+            <label><strong>Subject: </strong></label>
             <input
                 type="text"
                 placeholder="Select Subject"
@@ -127,9 +127,10 @@ function CourseSearch({ selectedCourses, setSelectedCourses, message, setMessage
                     </ul>
                 </div>
             )}
+            <p> </p>
 
             {/* Course Dropdown */}
-            <label style={{ marginTop: '1rem' }}><strong>Course:</strong></label>
+            <label style={{ marginTop: '1rem' }}><strong>Course: </strong></label>
             <input
                 type="text"
                 placeholder="Search for Course..."
@@ -146,7 +147,10 @@ function CourseSearch({ selectedCourses, setSelectedCourses, message, setMessage
             <button onClick={handleAddCourse}>Add</button>
 
             {showCourseDropdown && loadingCourses ? (
-                <p>{selectedSubjectCode ? "Loading courses..." : "Loading all courses..."} 🔄</p>
+                <p>{selectedSubjectCode ? "Loading courses..." : "Loading all courses..."}
+                <p> </p>  
+                <img  src="./loading.svg"/>
+                </p>
             ) : showCourseDropdown && courses.length > 0 ? (
                 <div className="scroll-container">
                     <ul className="dropdown">
