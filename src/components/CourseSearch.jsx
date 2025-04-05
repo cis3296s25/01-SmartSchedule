@@ -147,9 +147,9 @@ function CourseSearch({ selectedCourses, setSelectedCourses, message, setMessage
             <button onClick={handleAddCourse}>Add</button>
 
             {showCourseDropdown && loadingCourses ? (
-                <p>{selectedSubjectCode ? "Loading courses..." : "Loading all courses..."}
+                <p>{selectedSubjectCode ? <i>Loading courses... </i>: "Loading all courses..."}
                 <p> </p>  
-                <img  src="./loading.svg"/>
+                <img  src="./spinner.svg"/>
                 </p>
             ) : showCourseDropdown && courses.length > 0 ? (
                 <div className="scroll-container">
