@@ -1,7 +1,7 @@
 /* global scheduler */
 import { useState, useRef } from 'react';
 import './App.css';
-// import axios from "axios";
+import axios from "axios";
 import SemesterSelector from "./components/SemesterSelector.jsx";
 import GeneratedSchedules from "./components/GeneratedSchedules.jsx";
 import CourseSearch from './components/CourseSearch';
