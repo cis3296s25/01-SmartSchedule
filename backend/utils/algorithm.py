@@ -50,3 +50,4 @@ def generateSchedules(courses):
             break
 
     return all_schedules
+
