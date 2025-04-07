@@ -1,19 +1,47 @@
 import {useEffect, useState, useRef} from "react";
 
 function CourseSearch({selectedCourses, setSelectedCourses, message, setMessage}) {
+    // states for subject search and selection
     const [subjects, setSubjects] = useState([]);
     const [selectedSubject, setSelectedSubject] = useState('');
     const [selectedSubjectCode, setSelectedSubjectCode] = useState('');
     const [showSubjectDropdown, setShowSubjectDropdown] = useState(false);
 
+    // states for course search and selection
     const [courses, setCourses] = useState([]);
     const [search, setSearch] = useState('');
     const [showCourseDropdown, setShowCourseDropdown] = useState(false);
     const [loadingCourses, setLoadingCourses] = useState(false);
 
+    // fixed term passed in
     const termCode = "202503";
-    const hasFetchedSubjects = useRef(false);
 
+    // refs for prefetching apis on page load
+    const hasFetchedSubjects = useRef(false);
+    const hasPrefetchedCourses = useRef(false);
+
+
+    useEffect(() => {
+        if (hasPrefetchedCourses.current) return;
+        hasPrefetchedCourses.current = true;
+
+        const fetchAllCourses = async () => {
+            const cached = localStorage.getItem(`all_courses_${termCode}`);
+            if (cached) return;
+
+            try {
+                const res = await fetch(`http://localhost:8000/api/course-numbers?term_code=${termCode}`);
+                const data = await res.json();
+                const unique = [...new Set(data.courseNumbers)];
+                localStorage.setItem(`all_courses_${termCode}`, JSON.stringify(unique));
+                console.log("Prefetched all course numbers");
+            } catch (err) {
+                console.error("Failed to prefetch all course numbers:", err);
+            }
+        };
+
+        fetchAllCourses();
+    }, []);
 
     useEffect(() => {
         if (hasFetchedSubjects.current) return;
