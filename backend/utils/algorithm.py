@@ -1,17 +1,24 @@
-def generateSchedules(courses):
-    from itertools import permutations
+from itertools import product
 
+def generateSchedules(courses):
     all_schedules = {}
     count = 1
 
-    # try every possible order of the courses to generate distinct schedules
-    for perm in permutations(courses):
+    # group all course sections by course code
+    grouped = {}
+    for course in courses:
+        grouped.setdefault(course["code"], []).append(course)
+
+    # generate all combinations of 1 section per course
+    course_section_combinations = list(product(*grouped.values()))
+
+    # test each combination for conflicts
+    for combo in course_section_combinations:
         proposed_schedule = {}
         conflict = False
 
-        for current_course in perm:
+        for current_course in combo:
             for current_meeting in current_course["meetingTimes"]:
-                # check if the course conflicts with any already selected
                 for selected in proposed_schedule.values():
                     for selected_meeting in selected["meetingTimes"]:
                         overlapping_days = set(current_meeting["days"]) & set(selected_meeting["days"])
@@ -32,12 +39,14 @@ def generateSchedules(courses):
                     "creditHours": current_course["creditHours"],
                     "meetingTimes": current_course["meetingTimes"]
                 }
+            else:
+                break  # skip this combo if a conflict was found
 
-        if len(proposed_schedule) == len(courses):  # A full, valid schedule
+        if len(proposed_schedule) == len(grouped):  # full valid schedule
             all_schedules[count] = proposed_schedule
             count += 1
 
-        if count > 10:  # just generate up to 10
+        if count > 10:  # limit number of schedules
             break
 
     return all_schedules
