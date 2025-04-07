@@ -1,5 +1,7 @@
 import requests
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 
 def get_all_subjects(term_code) -> list[str]:
     """
@@ -141,6 +143,7 @@ def get_all_courses(term_code: str) -> list[dict]:
 
     Uses get_all_subjects to get a list of all subject codes
     Calls fetch_courses() to get all course sections for that subject and term
+    Fetches 5 subjects at once using threads
 
     Params:("202501")
 
@@ -171,16 +174,21 @@ def get_all_courses(term_code: str) -> list[dict]:
     all_courses = []
     subjects = get_all_subjects(term_code)
 
-    # for each subject in the list, call fetch courses to get all courses from all subjects
-    for subject in subjects:
+    def safe_fetch(subject):
         subject_code = subject["code"]
         print(f"Fetching courses for subject: {subject_code}")
         try:
-            courses = fetch_courses(term_code, subject_code)
-            all_courses.extend(courses)
-            time.sleep(0.3)  # avoid getting blocked
+            return fetch_courses(term_code, subject_code)
         except Exception as e:
             print(f"Error fetching {subject_code}: {e}")
+            return []
 
+    # limit to a reasonable number of parallel threads
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        futures = [executor.submit(safe_fetch, subject) for subject in subjects]
+        for future in as_completed(futures):
+            result = future.result()
+            all_courses.extend(result)
+
+    print(f"Finished fetching all courses. Total sections: {len(all_courses)}")
     return all_courses
-
