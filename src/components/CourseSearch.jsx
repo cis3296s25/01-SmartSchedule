@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import {useEffect, useState, useRef} from "react";
 
-function CourseSearch({ selectedCourses, setSelectedCourses, message, setMessage }) {
+function CourseSearch({selectedCourses, setSelectedCourses, message, setMessage}) {
     const [subjects, setSubjects] = useState([]);
     const [selectedSubject, setSelectedSubject] = useState('');
     const [selectedSubjectCode, setSelectedSubjectCode] = useState('');
@@ -12,13 +12,25 @@ function CourseSearch({ selectedCourses, setSelectedCourses, message, setMessage
     const [loadingCourses, setLoadingCourses] = useState(false);
 
     const termCode = "202503";
+    const hasFetchedSubjects = useRef(false);
+
 
     useEffect(() => {
+        if (hasFetchedSubjects.current) return;
+        hasFetchedSubjects.current = true;
+
         const fetchSubjects = async () => {
+            const cachedSubjects = localStorage.getItem(`subjects_${termCode}`);
+            if (cachedSubjects) {
+                setSubjects(JSON.parse(cachedSubjects));
+                return;
+            }
+
             try {
                 const res = await fetch(`http://localhost:8000/api/subjects?term_code=${termCode}`);
                 const data = await res.json();
                 setSubjects(data.subjects);
+                localStorage.setItem(`subjects_${termCode}`, JSON.stringify(data.subjects));
             } catch (err) {
                 console.error("Failed to fetch subjects", err);
             }
@@ -28,14 +40,23 @@ function CourseSearch({ selectedCourses, setSelectedCourses, message, setMessage
 
     const fetchCourses = async (subjectCode = '') => {
         setLoadingCourses(true);
-        setShowCourseDropdown(true); // Open immediately on subject selection
+        setShowCourseDropdown(true);
+
         try {
             let url;
             if (!subjectCode) {
+                const cachedCourses = localStorage.getItem(`all_courses_${termCode}`);
+                if (cachedCourses) {
+                    setCourses(JSON.parse(cachedCourses));
+                    return;
+                }
+
                 url = `http://localhost:8000/api/course-numbers?term_code=${termCode}`;
                 const res = await fetch(url);
                 const data = await res.json();
-                setCourses([...new Set(data.courseNumbers)]);
+                const uniqueCourses = [...new Set(data.courseNumbers)];
+                setCourses(uniqueCourses);
+                localStorage.setItem(`all_courses_${termCode}`, JSON.stringify(uniqueCourses));
             } else {
                 url = `http://localhost:8000/api/subject/courses?term_code=${termCode}&subject=${subjectCode}`;
                 const res = await fetch(url);
@@ -49,6 +70,7 @@ function CourseSearch({ selectedCourses, setSelectedCourses, message, setMessage
             setLoadingCourses(false);
         }
     };
+
 
     const handleSelectCourse = (course) => {
         setSearch(course);
@@ -127,10 +149,10 @@ function CourseSearch({ selectedCourses, setSelectedCourses, message, setMessage
                     </ul>
                 </div>
             )}
-            <p> </p>
+            <p></p>
 
             {/* Course Dropdown */}
-            <label style={{ marginTop: '1rem' }}><strong>Course: </strong></label>
+            <label style={{marginTop: '1rem'}}><strong>Course: </strong></label>
             <input
                 type="text"
                 placeholder="Search for Course..."
@@ -147,9 +169,9 @@ function CourseSearch({ selectedCourses, setSelectedCourses, message, setMessage
             <button onClick={handleAddCourse}>Add</button>
 
             {showCourseDropdown && loadingCourses ? (
-                <p>{selectedSubjectCode ? <i>Loading courses... </i>: "Loading all courses..."}
-                <p> </p>  
-                <img  src="./spinner.svg"/>
+                <p>{selectedSubjectCode ? <i>Loading courses... </i> : "Loading all courses..."}
+                    <p></p>
+                    <img src="./spinner.svg"/>
                 </p>
             ) : showCourseDropdown && courses.length > 0 ? (
                 <div className="scroll-container">
