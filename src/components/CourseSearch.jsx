@@ -1,6 +1,6 @@
-import {useEffect, useState, useRef} from "react";
+import { useEffect, useState, useRef } from "react";
 
-function CourseSearch({selectedCourses, setSelectedCourses, message, setMessage}) {
+function CourseSearch({ selectedCourses, setSelectedCourses, message, setMessage }) {
     // states for subject search and selection
     const [subjects, setSubjects] = useState([]);
     const [selectedSubject, setSelectedSubject] = useState('');
@@ -19,30 +19,39 @@ function CourseSearch({selectedCourses, setSelectedCourses, message, setMessage}
     // refs for prefetching apis on page load
     const hasFetchedSubjects = useRef(false);
     const hasPrefetchedCourses = useRef(false);
+    const isCoursePrefetchComplete = useRef(false);
+    const isPrefetchingCourses = useRef(false);
 
-
+    // prefetch course numbers
     useEffect(() => {
         if (hasPrefetchedCourses.current) return;
         hasPrefetchedCourses.current = true;
 
         const fetchAllCourses = async () => {
             const cached = localStorage.getItem(`all_courses_${termCode}`);
-            if (cached) return;
+            if (cached) {
+                isCoursePrefetchComplete.current = true;
+                return;
+            }
 
+            isPrefetchingCourses.current = true;
             try {
                 const res = await fetch(`http://localhost:8000/api/course-numbers?term_code=${termCode}`);
                 const data = await res.json();
                 const unique = [...new Set(data.courseNumbers)];
                 localStorage.setItem(`all_courses_${termCode}`, JSON.stringify(unique));
-                console.log("Prefetched all course numbers");
+                isCoursePrefetchComplete.current = true;
             } catch (err) {
                 console.error("Failed to prefetch all course numbers:", err);
+            } finally {
+                isPrefetchingCourses.current = false;
             }
         };
 
         fetchAllCourses();
     }, []);
 
+    // prefetch subjects
     useEffect(() => {
         if (hasFetchedSubjects.current) return;
         hasFetchedSubjects.current = true;
@@ -71,7 +80,6 @@ function CourseSearch({selectedCourses, setSelectedCourses, message, setMessage}
         setShowCourseDropdown(true);
 
         try {
-            let url;
             if (!subjectCode) {
                 const cachedCourses = localStorage.getItem(`all_courses_${termCode}`);
                 if (cachedCourses) {
@@ -79,15 +87,13 @@ function CourseSearch({selectedCourses, setSelectedCourses, message, setMessage}
                     return;
                 }
 
-                url = `http://localhost:8000/api/course-numbers?term_code=${termCode}`;
-                const res = await fetch(url);
+                const res = await fetch(`http://localhost:8000/api/course-numbers?term_code=${termCode}`);
                 const data = await res.json();
                 const uniqueCourses = [...new Set(data.courseNumbers)];
                 setCourses(uniqueCourses);
                 localStorage.setItem(`all_courses_${termCode}`, JSON.stringify(uniqueCourses));
             } else {
-                url = `http://localhost:8000/api/subject/courses?term_code=${termCode}&subject=${subjectCode}`;
-                const res = await fetch(url);
+                const res = await fetch(`http://localhost:8000/api/subject/courses?term_code=${termCode}&subject=${subjectCode}`);
                 const data = await res.json();
                 setCourses([...new Set(data.courses.map(c => c.code))]);
             }
@@ -124,7 +130,6 @@ function CourseSearch({selectedCourses, setSelectedCourses, message, setMessage}
 
     const handleSubjectClick = () => {
         setShowSubjectDropdown(true);
-        // reset it when the input is clicked again
         if (selectedSubjectCode) {
             setSelectedSubject('');
             setSelectedSubjectCode('');
@@ -146,14 +151,14 @@ function CourseSearch({selectedCourses, setSelectedCourses, message, setMessage}
         setSelectedSubjectCode(subj.code);
         setShowSubjectDropdown(false);
         setSearch('');
-        fetchCourses(subj.code); // auto-fetch and show course dropdown
+        fetchCourses(subj.code);
     };
 
     return (
         <div>
             <h3>Available Courses</h3>
 
-            {/* Subject Dropdown */}
+            {/* Subject Input */}
             <label><strong>Subject: </strong></label>
             <input
                 type="text"
@@ -167,10 +172,7 @@ function CourseSearch({selectedCourses, setSelectedCourses, message, setMessage}
                 <div className="scroll-container">
                     <ul className="dropdown">
                         {filterSubjects(selectedSubject).map((subj, idx) => (
-                            <li
-                                key={idx}
-                                onClick={() => handleSubjectSelect(subj)}
-                            >
+                            <li key={idx} onClick={() => handleSubjectSelect(subj)}>
                                 {subj.description}
                             </li>
                         ))}
@@ -187,8 +189,18 @@ function CourseSearch({selectedCourses, setSelectedCourses, message, setMessage}
                 value={search}
                 onFocus={() => {
                     setShowCourseDropdown(true);
+                    const cached = localStorage.getItem(`all_courses_${termCode}`);
+
                     if (!selectedSubjectCode && courses.length === 0) {
-                        fetchCourses(""); // Load all courses
+                        if (cached && !isPrefetchingCourses.current) {
+                            setLoadingCourses(true);
+                            setCourses(JSON.parse(cached));
+                            setTimeout(() => setLoadingCourses(false), 300); // simulate loading UI
+                        } else if (!cached && !isPrefetchingCourses.current) {
+                            fetchCourses(""); // fallback
+                        } else {
+                            setLoadingCourses(true); // user clicked before prefetch finished
+                        }
                     }
                 }}
                 onChange={(e) => setSearch(e.target.value)}
@@ -196,10 +208,12 @@ function CourseSearch({selectedCourses, setSelectedCourses, message, setMessage}
 
             <button onClick={handleAddCourse}>Add</button>
 
+            {/* Course Results */}
             {showCourseDropdown && loadingCourses ? (
-                <p>{selectedSubjectCode ? <i>Loading courses... </i> : "Loading all courses..."}
+                <p>
+                    {selectedSubjectCode ? <i>Loading courses...</i> : "Loading all courses..."}
                     <p></p>
-                    <img src="./spinner.svg"/>
+                    <img src="./spinner.svg" alt="loading" />
                 </p>
             ) : showCourseDropdown && courses.length > 0 ? (
                 <div className="scroll-container">
@@ -223,6 +237,7 @@ function CourseSearch({selectedCourses, setSelectedCourses, message, setMessage}
 }
 
 export default CourseSearch;
+
 
 
 
