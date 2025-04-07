@@ -2,6 +2,8 @@ import requests
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+subject_cache = {}
+
 
 def get_all_subjects(term_code) -> list[str]:
     """
@@ -54,6 +56,12 @@ def fetch_courses(term_code: str, subject: str) -> list[dict]:
 
     Returns list of dictionaries where each dictionary represents a course section
     """
+    cache_key = f"{term_code}_{subject}"
+    if cache_key in subject_cache:
+        print(f"Cache hit for {cache_key}")
+        return subject_cache[cache_key]
+
+    print(f"Fetching courses for {subject}...")
     try:
         courses = []
         session = requests.Session()
@@ -132,9 +140,13 @@ def fetch_courses(term_code: str, subject: str) -> list[dict]:
             page_offset += page_size
             time.sleep(0.3)  # give the server some time
 
+        # store in in-memory cache
+        subject_cache[cache_key] = courses
+        print(f"Cached {len(courses)} courses for {subject}")
         return courses
 
     except Exception as e:
+        print(f"Error fetching courses for {subject}: {e}")
         return [{"error": f"Failed to fetch courses for {subject}: {str(e)}"}]
 
 def get_all_courses(term_code: str) -> list[dict]:

@@ -21,6 +21,7 @@ function CourseSearch({ selectedCourses, setSelectedCourses, message, setMessage
     const hasPrefetchedCourses = useRef(false);
     const isCoursePrefetchComplete = useRef(false);
     const isPrefetchingCourses = useRef(false);
+    const subjectCoursesCache = useRef({});
 
     // prefetch course numbers
     useEffect(() => {
@@ -93,9 +94,20 @@ function CourseSearch({ selectedCourses, setSelectedCourses, message, setMessage
                 setCourses(uniqueCourses);
                 localStorage.setItem(`all_courses_${termCode}`, JSON.stringify(uniqueCourses));
             } else {
+                // check in-memory cache first
+                if (subjectCoursesCache.current[subjectCode]) {
+                    setCourses(subjectCoursesCache.current[subjectCode]);
+                    return;
+                }
+
                 const res = await fetch(`http://localhost:8000/api/subject/courses?term_code=${termCode}&subject=${subjectCode}`);
                 const data = await res.json();
-                setCourses([...new Set(data.courses.map(c => c.code))]);
+                const codes = [...new Set(data.courses.map(c => c.code))];
+
+                // cache it
+                subjectCoursesCache.current[subjectCode] = codes;
+
+                setCourses(codes);
             }
         } catch (err) {
             console.error("Failed to fetch courses", err);
@@ -213,7 +225,7 @@ function CourseSearch({ selectedCourses, setSelectedCourses, message, setMessage
                 <p>
                     {selectedSubjectCode ? <i>Loading courses...</i> : "Loading all courses..."}
                     <p></p>
-                    <img src="./spinner.svg" alt="loading" />
+                    <img src="./spinner.svg" alt="loading"/>
                 </p>
             ) : showCourseDropdown && courses.length > 0 ? (
                 <div className="scroll-container">
