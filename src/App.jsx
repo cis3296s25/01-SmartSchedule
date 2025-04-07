@@ -85,12 +85,13 @@ function App() {
             </div>
 
             <button onClick={handleGeneration} disabled={loadingSchedules}>
-                {loadingSchedules ? "Generating..." : "Generate Schedules"}
+              {loadingSchedules ? <i>Generating...</i> : "Generate Schedules"}
             </button>
 
             <GeneratedSchedules schedule={schedule} schedulerContainerRef={schedulerContainerRef}/>
         </>
     );
+
 
 }
 

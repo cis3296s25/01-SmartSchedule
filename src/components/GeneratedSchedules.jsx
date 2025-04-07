@@ -7,6 +7,10 @@ function GeneratedSchedules({ schedule, schedulerContainerRef }) {
 
         scheduler.init(schedulerContainerRef.current, new Date(), "week");
 
+        // Limit view from Monday to Friday, 7am to 11pm
+        scheduler.config.first_hour = 7;
+        scheduler.config.last_hour = 23;
+
         if (!schedule || Object.keys(schedule).length === 0) return;
 
         const eventList = [];
@@ -38,9 +42,10 @@ function GeneratedSchedules({ schedule, schedulerContainerRef }) {
 
                         eventList.push({
                             id: eventId++,
-                            text: `${course.code} - ${course.title}`,
+                            text: `${course.title}`,
                             start_date: eventStart,
                             end_date: eventEnd,
+                            //${scheduleItem[0]} or ${course.code} this is undefined for some reason
                         });
                     });
                 });
@@ -49,36 +54,32 @@ function GeneratedSchedules({ schedule, schedulerContainerRef }) {
 
         scheduler.clearAll();
         scheduler.parse(eventList, "json");
-    }, [schedule]);
+    }, [schedule, schedulerContainerRef]);
 
     return (
         <div className="container" style={{ display: 'flex', gap: '2rem', marginTop: '2rem' }}>
             {/* Scheduler on the left */}
             <div
                 ref={schedulerContainerRef}
-                style={{ flex: 2, height: "600px", border: "1px solid #ccc", borderRadius: "8px" }}
+                style={{ flex: 2, height: "680px", border: "1px solid #ccc", borderRadius: "8px" }}
             ></div>
 
             {/* Schedule list on the right */}
             <div style={{ flex: 1 }}>
-                <h3>Schedules</h3>
                 {Object.keys(schedule).length > 0 ? (
                     <div className="grid gap-4">
-                        {Object.entries(schedule).map(([day, classes]) => (
-                            <div key={day} className="p-4 border rounded-lg shadow-md">
-                                <h4 className="font-bold capitalize">{day}:</h4>
-                                <ul>
-                                    {classes.length > 0 ? (
-                                        classes.map((cls, index) => (
-                                            <li key={index} className="mt-2">
-                                                <strong>{cls.code}</strong> - {cls.title} ({cls.start}-{cls.end}) with {cls.professor}
-                                            </li>
-                                        ))
-                                    ) : (
-                                        <p>No classes scheduled.</p>
-                                    )}
-                                </ul>
+                        {Object.entries(schedule).map(([sched_num, course]) => (
+                            <div key={sched_num} className="p-4 border rounded-lg shadow-md">
+                            <h3> Schedule {sched_num}:</h3>
+                            {Object.entries(course).map(([course_num, {title, CRN, professor, creditHours}]) => (
+                                <div>
+                                <h4>{course_num} - {title}</h4>
+                                <h5> {professor} </h5>
+                                <h5>  CRN:{CRN}  Credits: {creditHours} </h5> 
+                                {/* doesnt include meeting times start and end yet*/}
                             </div>
+                            ))}
+                        </div>
                         ))}
                     </div>
                 ) : (
@@ -93,7 +94,7 @@ export default GeneratedSchedules;
 
 
 
-
+                                
 
 
 
