@@ -1,14 +1,48 @@
 import requests
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
-def get_all_subjects() -> list[str]:
+subject_cache = {}
+
+
+def get_all_subjects(term_code) -> list[str]:
     """
     Had to change to return hard coded list since endpoint was not working
     """
-    return [
-        "CIS", "MATH", "BIOL", "CHEM", "PHYS", "STAT", "ENG", "PHIL",
-        "ECON", "PSY", "SOC", "SPAN", "ITAL", "HIST", "ART", "ENGL", "EES"
-    ]
+    try:
+        session = requests.Session()
+
+        # establish session
+        session.get("https://prd-xereg.temple.edu/StudentRegistrationSsb/ssb/classSearch/classSearch")
+
+        # make the subject list request
+        params = {
+            "searchTerm": "",
+            "term": term_code,
+            "offset": 1,
+            "max": 999
+        }
+
+        headers = {
+            "Accept": "application/json",
+            "Referer": "https://prd-xereg.temple.edu/StudentRegistrationSsb/ssb/classSearch/classSearch",
+            "User-Agent": "Mozilla/5.0"
+        }
+
+        response = session.get(
+            "https://prd-xereg.temple.edu/StudentRegistrationSsb/ssb/classSearch/get_subject",
+            headers=headers,
+            params=params
+        )
+
+        response.raise_for_status()
+        subjects = response.json()
+
+        return sorted(subjects, key=lambda s: s["code"])  # preserve code and description
+
+    except Exception as e:
+        print(f"[ERROR] Failed to fetch subjects: {e}")
+        return []
 
 
 def fetch_courses(term_code: str, subject: str) -> list[dict]:
@@ -22,6 +56,12 @@ def fetch_courses(term_code: str, subject: str) -> list[dict]:
 
     Returns list of dictionaries where each dictionary represents a course section
     """
+    cache_key = f"{term_code}_{subject}"
+    if cache_key in subject_cache:
+        print(f"Cache hit for {cache_key}")
+        return subject_cache[cache_key]
+
+    print(f"Fetching courses for {subject}...")
     try:
         courses = []
         session = requests.Session()
@@ -100,9 +140,13 @@ def fetch_courses(term_code: str, subject: str) -> list[dict]:
             page_offset += page_size
             time.sleep(0.3)  # give the server some time
 
+        # store in in-memory cache
+        subject_cache[cache_key] = courses
+        print(f"Cached {len(courses)} courses for {subject}")
         return courses
 
     except Exception as e:
+        print(f"Error fetching courses for {subject}: {e}")
         return [{"error": f"Failed to fetch courses for {subject}: {str(e)}"}]
 
 def get_all_courses(term_code: str) -> list[dict]:
@@ -111,6 +155,7 @@ def get_all_courses(term_code: str) -> list[dict]:
 
     Uses get_all_subjects to get a list of all subject codes
     Calls fetch_courses() to get all course sections for that subject and term
+    Fetches 5 subjects at once using threads
 
     Params:("202501")
 
@@ -139,17 +184,23 @@ def get_all_courses(term_code: str) -> list[dict]:
       }...
     """
     all_courses = []
-    subjects = get_all_subjects()
+    subjects = get_all_subjects(term_code)
 
-    # for each subject in the list, call fetch courses to get all courses from all subjects
-    for subject in subjects:
-        print(f"Fetching courses for subject: {subject}")
+    def safe_fetch(subject):
+        subject_code = subject["code"]
+        print(f"Fetching courses for subject: {subject_code}")
         try:
-            courses = fetch_courses(term_code, subject)
-            all_courses.extend(courses)
-            time.sleep(0.3)  # avoid getting blocked
+            return fetch_courses(term_code, subject_code)
         except Exception as e:
-            print(f"Error fetching {subject}: {e}")
+            print(f"Error fetching {subject_code}: {e}")
+            return []
 
+    # limit to a reasonable number of parallel threads
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        futures = [executor.submit(safe_fetch, subject) for subject in subjects]
+        for future in as_completed(futures):
+            result = future.result()
+            all_courses.extend(result)
+
+    print(f"Finished fetching all courses. Total sections: {len(all_courses)}")
     return all_courses
-
