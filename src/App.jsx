@@ -78,8 +78,14 @@ function App() {
       </div>
 
       <button onClick={handleGeneration} disabled={loadingSchedules}>
-        {loadingSchedules ? "Generating..." : "Generate Schedules"}
+        {loadingSchedules ? <i>Generating...</i> : "Generate Schedules"}
       </button>
+        {/* {loadingSchedules ? (
+          <>
+            <p> </p>
+            <img src="./generate.svg" alt="Loading" style={{ width: "100px", height: "100px", marginLeft: "8px" }} />
+          </>
+        ) : (" ")} */}
 
       <GeneratedSchedules schedule={schedule} schedulerContainerRef={schedulerContainerRef} />
     </>
