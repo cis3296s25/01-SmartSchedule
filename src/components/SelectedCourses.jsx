@@ -3,8 +3,17 @@ import React, { useState } from 'react';
 function SelectedCourses({ selectedCourses, setSelectedCourses }) {
     const [message, setMessage] = useState('');
 
-    const handleRemoveCourse = (course) => {
-        setSelectedCourses((prev) => prev.filter((item) => item !== course));
+    // group by course code
+    const groupedByCode = {};
+    selectedCourses.forEach(course => {
+        if (!groupedByCode[course.code]) {
+            groupedByCode[course.code] = [];
+        }
+        groupedByCode[course.code].push(course);
+    });
+
+    const handleRemoveCourseCode = (code) => {
+        setSelectedCourses(prev => prev.filter(course => course.code !== code));
     };
 
     const handleClearCourses = () => {
@@ -34,15 +43,17 @@ function SelectedCourses({ selectedCourses, setSelectedCourses }) {
             ) : (
                 <>
                     <ul>
-                        {selectedCourses.map((course, index) => (
+                        {Object.keys(groupedByCode).map((code, index) => (
                             <li key={index}>
-                                {course} <button onClick={() => handleRemoveCourse(course)}>Remove</button>
+                                {code}
+                                <button onClick={() => handleRemoveCourseCode(code)}>Remove</button>
                             </li>
                         ))}
                     </ul>
                     <button onClick={handleClearCourses}>Clear All</button>
                 </>
             )}
+
             <div style={{ marginTop: '1rem' }}>
                 <button onClick={saveSchedule}>💾 Save Schedule</button>
             </div>
@@ -56,5 +67,6 @@ function SelectedCourses({ selectedCourses, setSelectedCourses }) {
 }
 
 export default SelectedCourses;
+
 
 

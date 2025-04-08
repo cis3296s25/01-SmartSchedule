@@ -46,8 +46,6 @@ def generateSchedules(courses):
             all_schedules[count] = proposed_schedule
             count += 1
 
-        if count > 10:  # limit number of schedules
-            break
 
     return all_schedules
 
