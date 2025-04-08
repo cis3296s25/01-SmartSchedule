@@ -2,6 +2,7 @@
 import {useState, useRef} from 'react';
 import './App.css';
 import axios from "axios";
+import logo from "./assets/templelogo.png";
 import SemesterSelector from "./components/SemesterSelector.jsx";
 import GeneratedSchedules from "./components/GeneratedSchedules.jsx";
 import CourseSearch from './components/CourseSearch';
@@ -65,7 +66,10 @@ function App() {
 
     return (
         <>
+
             <h1>SmartSchedule 📅</h1>
+            <img src={logo} className="templelogo" />
+
             <h3>Temple's Course Schedule Generator</h3>
 
             <div className="container">
