@@ -55,6 +55,7 @@ function App() {
 
             console.log("✅ Schedules:", response.data);
             setSchedule(response.data);
+            console.log(schedule)
         } catch (error) {
             console.error("Error generating schedules:", error);
         } finally {
