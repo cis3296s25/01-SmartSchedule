@@ -1,6 +1,6 @@
-import { useEffect, useState, useRef } from "react";
+import {useEffect, useState, useRef} from "react";
 
-function CourseSearch({ selectedCourses, setSelectedCourses, message, setMessage }) {
+function CourseSearch({selectedCourses, setSelectedCourses, message, setMessage}) {
     // states for subject search and selection
     const [subjects, setSubjects] = useState([]);
     const [selectedSubject, setSelectedSubject] = useState('');
@@ -94,20 +94,16 @@ function CourseSearch({ selectedCourses, setSelectedCourses, message, setMessage
                 setCourses(uniqueCourses);
                 localStorage.setItem(`all_courses_${termCode}`, JSON.stringify(uniqueCourses));
             } else {
-                // check in-memory cache first
-                if (subjectCoursesCache.current[subjectCode]) {
-                    setCourses(subjectCoursesCache.current[subjectCode]);
-                    return;
-                }
-
+                // fetch full course section objects
                 const res = await fetch(`http://localhost:8000/api/subject/courses?term_code=${termCode}&subject=${subjectCode}`);
                 const data = await res.json();
-                const codes = [...new Set(data.courses.map(c => c.code))];
 
-                // cache it
-                subjectCoursesCache.current[subjectCode] = codes;
+                // cache full section objects by subject
+                subjectCoursesCache.current[subjectCode] = data.courses;
 
-                setCourses(codes);
+                // extract course codes for dropdown
+                const courseCodes = [...new Set(data.courses.map(c => c.code))];
+                setCourses(courseCodes);
             }
         } catch (err) {
             console.error("Failed to fetch courses", err);
@@ -124,13 +120,41 @@ function CourseSearch({ selectedCourses, setSelectedCourses, message, setMessage
     };
 
     const handleAddCourse = () => {
-        if (search && !selectedCourses.includes(search)) {
-            setSelectedCourses([...selectedCourses, search]);
-            setSearch('');
-            setShowCourseDropdown(false);
-            setMessage(`✅ Added ${search}`);
+        if (!search) return;
+
+        const matchingSections = [];
+
+        // search all cached subjects for full section matches
+        Object.values(subjectCoursesCache.current).forEach(sectionList => {
+            sectionList.forEach(section => {
+                if (section.code === search) {
+                    matchingSections.push(section);
+                }
+            });
+        });
+
+        if (matchingSections.length === 0) {
+            setMessage(`No sections found for ${search}`);
+            return;
         }
+
+        // filter out sections already selected by CRN
+        const newSections = matchingSections.filter(section =>
+            !selectedCourses.some(existing => existing.CRN === section.CRN)
+        );
+
+        if (newSections.length === 0) {
+            setMessage(`All sections of ${search} already added`);
+            return;
+        }
+
+        console.log("✅ Adding sections to selectedCourses:", newSections);
+        setSelectedCourses(prev => [...prev, ...newSections]);
+        setMessage(`✅ Added ${search} (${newSections.length} section${newSections.length > 1 ? 's' : ''})`);
+        setSearch('');
+        setShowCourseDropdown(false);
     };
+
 
     const filterSubjects = (query) => {
         const lower = query.toLowerCase();

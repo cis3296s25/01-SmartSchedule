@@ -24,8 +24,8 @@ function App() {
             const termCode = "202503";
 
             // array of promises to fetch each subject’s courses in parallel
-            const courseFetchPromises = selectedCourses.map(code => {
-                const [subject] = code.split(" ");
+            const courseFetchPromises = selectedCourses.map(course => {
+                const [subject] = course.code.split(" ");
                 return axios.get("http://localhost:8000/api/subject/courses", {
                     params: {
                         subject,
@@ -40,9 +40,9 @@ function App() {
             // flatten results into full course data
             const fullCourses = [];
 
-            selectedCourses.forEach((code, index) => {
+            selectedCourses.forEach((course, index) => {
                 const courseList = courseResponses[index].data.courses;
-                const matching = courseList.find(c => c.code === code);
+                const matching = courseList.find(c => c.CRN === course.CRN); // match by section
                 if (matching) {
                     fullCourses.push(matching);
                 }
