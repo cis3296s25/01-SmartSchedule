@@ -1,7 +1,7 @@
 /* global scheduler */
 import { useEffect, useState } from 'react';
 
-function GeneratedSchedules({ schedule, schedulerContainerRef, isLoading }) {
+function GeneratedSchedules({ schedule, schedulerContainerRef }) {
     const [currentScheduleIndex, setCurrentScheduleIndex] = useState(1);
     const scheduleKeys = Object.keys(schedule);
 
@@ -103,7 +103,7 @@ function GeneratedSchedules({ schedule, schedulerContainerRef, isLoading }) {
 
             {/* Schedule list on the right */}
             <div style={{ flex: 1 }}>
-                {/* /* {schedule[currentScheduleIndex] ? (
+                {schedule[currentScheduleIndex] ? (
                     <div className="p-4 border rounded-lg shadow-md">
                         {Object.entries(schedule[currentScheduleIndex]).map(([courseCode, course]) => (
                             <div key={course.CRN} style={{ marginBottom: '1rem' }}>
@@ -124,34 +124,7 @@ function GeneratedSchedules({ schedule, schedulerContainerRef, isLoading }) {
                     </div>
                 ) : (
                     <p className="text-gray-500">No schedule selected.</p>
-                )} */ }
-                {isLoading ? (
-                    <p className="text-gray-500">⏳ Generating your schedule...</p>
-                    ) : scheduleKeys.length === 0 ? (
-                    <p className="text-red-500">⚠️ No valid schedule could be generated. Try changing your selected courses.</p>
-                    ) : !schedule[currentScheduleIndex] ? (
-                    <p className="text-gray-500">No schedule selected.</p>
-                    ) : (
-                    <div className="p-4 border rounded-lg shadow-md">
-                        {Object.entries(schedule[currentScheduleIndex]).map(([courseCode, course]) => (
-                        <div key={course.CRN} style={{ marginBottom: '1rem' }}>
-                            <h4>{courseCode} - {course.title}</h4>
-                            <p><strong>Professor:</strong> {course.professor}</p>
-                            <p><strong>CRN:</strong> {course.CRN}</p>
-                            <p><strong>Credits:</strong> {course.creditHours}</p>
-                            <div>
-                            {course.meetingTimes.map((mt, idx) => (
-                                <p key={idx}>
-                                {mt.days.join(', ')} | {mt.start} - {mt.end} ({mt.type})
-                                </p>
-                            ))}
-                            </div>
-                            <hr />
-                        </div>
-                        ))}
-                    </div>
-                    )}
-
+                )}
             </div>
         </div>
     );
