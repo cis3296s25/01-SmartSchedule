@@ -55,11 +55,11 @@ function SelectedCourses({ selectedCourses, setSelectedCourses }) {
             )}
 
             <div style={{ marginTop: '1rem' }}>
-                <button onClick={saveSchedule}>💾 Save Schedule</button>
+                <button onClick={saveSchedule}>💾 Save Courses</button>
             </div>
 
             <div style={{ marginTop: '0.5rem' }}>
-                <button onClick={loadSchedule}>📂 Load Schedule</button>
+                <button onClick={loadSchedule}>📂 Load Courses</button>
                 {message && <p>{message}</p>}
             </div>
         </div>

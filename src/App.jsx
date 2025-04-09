@@ -65,7 +65,10 @@ function App() {
 
     return (
         <>
+
             <h1>SmartSchedule 📅</h1>
+            <img src={logo} className="templelogo" />
+
             <h3>Temple's Course Schedule Generator</h3>
 
             <div className="container">
