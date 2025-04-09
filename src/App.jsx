@@ -49,6 +49,16 @@ function App() {
                 }
             });
 
+            console.log("📦 Sending to backend:", JSON.stringify({ courses: fullCourses }, null, 2));
+
+            console.log("🧪 Course preview:", fullCourses.map(c => ({
+                code: c.code,
+                CRN: c.CRN,
+                professor: c.professor,
+                meetingTimes: c.meetingTimes
+              })));
+              
+
             // call generate API
             const response = await axios.post("http://localhost:8000/api/generate", {
                 courses: fullCourses
@@ -92,7 +102,7 @@ function App() {
               {loadingSchedules ? <i>Generating...</i> : "Generate Schedules"}
             </button>
 
-            <GeneratedSchedules schedule={schedule} schedulerContainerRef={schedulerContainerRef}/>
+            <GeneratedSchedules schedule={schedule} schedulerContainerRef={schedulerContainerRef} isLoading={loadingSchedules}/>
         </>
     );
 
