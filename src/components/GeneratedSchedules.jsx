@@ -22,8 +22,8 @@ function GeneratedSchedules({ schedule, schedulerContainerRef }) {
 
         const courseColors = {};
         const colorPalette = [
-            "#DC2328", "#EC7713", "#4DA10D", "#2883D7", "#2C46D3",
-            "#8B3EC1", "#C033CC"
+            "#D9262E", "#D97826", "#E7D718", "#75C23D", "#3888C7",
+            "#38C7BE"
         ];
         let colorIndex = 0;
 
