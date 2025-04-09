@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ScheduleRestrictions from './ScheduleRestrictions'; 
 
 function SemesterSelector({ semester, setSemester }) {
     const [showDropdown, setShowDropdown] = useState(false);
@@ -36,9 +37,8 @@ function SemesterSelector({ semester, setSemester }) {
                     )}
                 </div>
 
-                <div>
-                    <h3>Schedule Restrictions</h3>
-                </div>
+                <ScheduleRestrictions />
+
             </div>
     );
 }
