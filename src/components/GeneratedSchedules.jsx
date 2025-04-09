@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 
 function GeneratedSchedules({ schedule, schedulerContainerRef, isLoading }) {
     const [currentScheduleIndex, setCurrentScheduleIndex] = useState(1);
-
     const scheduleKeys = Object.keys(schedule);
 
     useEffect(() => {
@@ -19,10 +18,23 @@ function GeneratedSchedules({ schedule, schedulerContainerRef, isLoading }) {
         let eventId = 1;
 
         const selectedSchedule = schedule[currentScheduleIndex];
-
         if (!selectedSchedule) return;
 
-        Object.values(selectedSchedule).forEach((course) => {
+        const courseColors = {};
+        const colorPalette = [
+            "#D9262E", "#D97826", "#E7D718", "#75C23D", "#3888C7",
+            "#38C7BE"
+        ];
+        let colorIndex = 0;
+
+        Object.entries(selectedSchedule).forEach(([courseCode, course]) => {
+            if (!course.meetingTimes) return;
+
+            if (!courseColors[courseCode]) {
+                courseColors[courseCode] = colorPalette[colorIndex % colorPalette.length];
+                colorIndex++;
+            }
+
             course.meetingTimes.forEach((mt) => {
                 mt.days.forEach((day) => {
                     const dayMap = {
@@ -32,6 +44,8 @@ function GeneratedSchedules({ schedule, schedulerContainerRef, isLoading }) {
                         thursday: 4,
                         friday: 5,
                     };
+
+                    if (!(day in dayMap)) return;
 
                     const startHour = parseInt(mt.start.substring(0, 2), 10);
                     const startMin = parseInt(mt.start.substring(2), 10);
@@ -50,6 +64,7 @@ function GeneratedSchedules({ schedule, schedulerContainerRef, isLoading }) {
                         text: `${course.title}`,
                         start_date: eventStart,
                         end_date: eventEnd,
+                        color: courseColors[courseCode],
                     });
                 });
             });
