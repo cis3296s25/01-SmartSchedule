@@ -103,6 +103,7 @@ function GeneratedSchedules({ schedule, schedulerContainerRef }) {
                                         </p>
                                     ))}
                                 </div>
+                                <hr/>
                             </div>
                         ))}
                     </div>
