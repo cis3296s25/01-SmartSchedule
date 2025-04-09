@@ -9,22 +9,23 @@
 - npm (Node package manager)
 
 ---
-
 ### How to run 
 
 1. In project directory, run: 
     ```
     npm install
     ```
-and 
+ 
     ```
     npm install axios
     ```
-2. Start local development server  
+2. Start local development server: 
     ```
     npm run dev
     ```
 3. Wait up to 5 minutes for the courses to succesfully load onto the screen.
+
+4. Open another terminal, to run the backend.
  
 ---
 
