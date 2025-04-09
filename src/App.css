@@ -106,6 +106,12 @@
   flex-grow: 2;
 }
 
+/* Force the scheduler to show full height (e.g. 7:00 – 22:00) without scrollbars */
+.dhx_cal_container {
+  height: 800px !important;        /* Makes the whole schedule container taller to show more hours */
+  overflow: visible !important;     /* Ensures no scrollbars and that everything is visible */
+}
+
 
 ul {
   list-style-type: none;  
