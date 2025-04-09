@@ -3,8 +3,11 @@ import {useState, useRef} from 'react';
 import './App.css';
 import axios from "axios";
 
+
 import html2canvas from "html2canvas"; // Used to capture the DOM as an image
 import jsPDF from "jspdf"; // Used to generate and export PDF files
+
+import logo from "./assets/templelogo.png";
 
 import SemesterSelector from "./components/SemesterSelector.jsx";
 import GeneratedSchedules from "./components/GeneratedSchedules.jsx";
@@ -51,6 +54,16 @@ function App() {
                     fullCourses.push(matching);
                 }
             });
+
+            console.log("📦 Sending to backend:", JSON.stringify({ courses: fullCourses }, null, 2));
+
+            console.log("🧪 Course preview:", fullCourses.map(c => ({
+                code: c.code,
+                CRN: c.CRN,
+                professor: c.professor,
+                meetingTimes: c.meetingTimes
+              })));
+              
 
             // call generate API
             const response = await axios.post("http://localhost:8000/api/generate", {
@@ -99,7 +112,10 @@ function App() {
 
     return (
         <>
+
             <h1>SmartSchedule 📅</h1>
+            <img src={logo} className="templelogo" />
+
             <h3>Temple's Course Schedule Generator</h3>
 
             <div className="container">
@@ -122,6 +138,7 @@ function App() {
               {loadingSchedules ? <i>Generating...</i> : "Generate Schedules"}
             </button>
 
+
             <GeneratedSchedules schedule={schedule} schedulerContainerRef={schedulerContainerRef}/>
         
         {/* New buttons added to allow users to download their schedule as .pdf/.jpg */}
@@ -133,6 +150,9 @@ function App() {
                 </div>
             )}
         
+
+            <GeneratedSchedules schedule={schedule} schedulerContainerRef={schedulerContainerRef} isLoading={loadingSchedules}/>
+
         </>
 
     );
