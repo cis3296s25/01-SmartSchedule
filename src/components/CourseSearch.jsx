@@ -1,6 +1,6 @@
 import {useEffect, useState, useRef} from "react";
 
-function CourseSearch({selectedCourses, setSelectedCourses, message, setMessage}) {
+function CourseSearch({selectedCourses, setSelectedCourses, message, setMessage, termCode}) {
     // states for subject search and selection
     const [subjects, setSubjects] = useState([]);
     const [selectedSubject, setSelectedSubject] = useState('');
@@ -12,9 +12,6 @@ function CourseSearch({selectedCourses, setSelectedCourses, message, setMessage}
     const [search, setSearch] = useState('');
     const [showCourseDropdown, setShowCourseDropdown] = useState(false);
     const [loadingCourses, setLoadingCourses] = useState(false);
-
-    // fixed term passed in
-    const termCode = "202503";
 
     // refs for prefetching apis on page load
     const hasFetchedSubjects = useRef(false);
@@ -75,6 +72,23 @@ function CourseSearch({selectedCourses, setSelectedCourses, message, setMessage}
         };
         fetchSubjects();
     }, []);
+
+    // reset everything when semester changes
+    useEffect(() => {
+    hasFetchedSubjects.current = false;
+    hasPrefetchedCourses.current = false;
+    subjectCoursesCache.current = {};
+
+    setSelectedSubject('');
+    setSelectedSubjectCode('');
+    setCourses([]);
+    setSearch('');
+    setShowSubjectDropdown(false);
+    setShowCourseDropdown(false);
+
+}, [termCode]);
+
+
 
     const fetchCourses = async (subjectCode = '') => {
         setLoadingCourses(true);

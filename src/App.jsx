@@ -12,6 +12,7 @@ function App() {
     const [message, setMessage] = useState('');
     const [selectedCourses, setSelectedCourses] = useState([]);
     const [semester, setSemester] = useState('');
+    const [termCode, setTermCode] = useState('202503') // defaults to Spring 2025
     const [loadingSchedules, setLoadingSchedules] = useState(false);
     const [schedule, setSchedule] = useState({});
     const schedulerContainerRef = useRef(null);
@@ -21,9 +22,8 @@ function App() {
         setLoadingSchedules(true);
 
         try {
-            const termCode = "202503";
 
-            // array of promises to fetch each subject’s courses in parallel
+            // fetch full section data for each selected course
             const courseFetchPromises = selectedCourses.map(course => {
                 const [subject] = course.code.split(" ");
                 return axios.get("http://localhost:8000/api/subject/courses", {
@@ -48,9 +48,8 @@ function App() {
                 }
             });
 
-            console.log("📦 Sending to backend:", JSON.stringify({ courses: fullCourses }, null, 2));
 
-            console.log("🧪 Course preview:", fullCourses.map(c => ({
+            console.log("Course preview:", fullCourses.map(c => ({
                 code: c.code,
                 CRN: c.CRN,
                 professor: c.professor,
@@ -83,8 +82,16 @@ function App() {
 
             <div className="container">
 
-                <SemesterSelector semester={semester} setSemester={setSemester}/>
+                <SemesterSelector
+                    semester={semester}
+                    setSemester={setSemester}
+                    termCode={termCode}
+                    setTermCode={setTermCode}
+                    setSelectedCourses={setSelectedCourses}
+                />
+
                 <CourseSearch
+                    termCode={termCode}
                     selectedCourses={selectedCourses}
                     setSelectedCourses={setSelectedCourses}
                     setMessage={setMessage}
