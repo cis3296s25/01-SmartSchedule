@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 
 function ScheduleRestrictions() {
-    const [restrictions, setRestrictions] = useState([]); 
+    const [restrictions, setRestrictions] = useState([]);
     const [showSection, setShowSection] = useState(false);
 
     const hourOptions = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
     const minuteOptions = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
     const ampmOptions = ["AM", "PM"];
+    const daysOfWeek = ["Sun", "Mon", "Tues", "Wed", "Thurs", "Fri", "Sat"];
 
     const addRestriction = () => {
         const newRestriction = {
@@ -16,7 +17,16 @@ function ScheduleRestrictions() {
             toHour: "",
             toMinute: "",
             toAmPm: "",
-            isEntered: false  //false until user clicks enter
+            isEntered: false,
+            days: {
+                Sunday: false,
+                Monday: false,
+                Tuesday: false,
+                Wednesday: false,
+                Thursday: false,
+                Friday: false,
+                Saturday: false
+            }
         };
         setRestrictions((prev) => [...prev, newRestriction]);
     };
@@ -27,11 +37,17 @@ function ScheduleRestrictions() {
         setRestrictions(updated);
     };
 
+    const toggleDay = (index, day) => {
+        const updated = [...restrictions];
+        updated[index].days[day] = !updated[index].days[day];
+        setRestrictions(updated);
+    };
+
     const isRestrictionComplete = (restriction) => {
-        return (
-            restriction.fromHour && restriction.fromMinute && restriction.fromAmPm &&
-            restriction.toHour && restriction.toMinute && restriction.toAmPm
-        ); //returns true if all 6 dropdowns are filled in a given row
+        const timeFilled = restriction.fromHour && restriction.fromMinute && restriction.fromAmPm &&
+                           restriction.toHour && restriction.toMinute && restriction.toAmPm;
+        const anyDaySelected = Object.values(restriction.days).some(Boolean);
+        return timeFilled && anyDaySelected;
     };
 
     const handleEnter = (index) => {
@@ -55,8 +71,10 @@ function ScheduleRestrictions() {
             {showSection && (
                 <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                     {restrictions.map((restriction, index) => (
-                        <div key={index} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <div key={index} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                             <strong>Restriction {index + 1}</strong>
+
+                            {/* Time selection row */}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
                                 {/* FROM */}
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -93,16 +111,31 @@ function ScheduleRestrictions() {
                                         {ampmOptions.map(ap => <option key={ap} value={ap}>{ap}</option>)}
                                     </select>
                                 </div>
-
-                                {/* ENTER button */}
-                                {!restriction.isEntered && isRestrictionComplete(restriction) && (
-                                    <button onClick={() => handleEnter(index)}>Enter</button>
-                                )}
                             </div>
+
+                            {/* Day checkboxes in a row */}
+                            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                                {daysOfWeek.map((day) => (
+                                    <label key={day}>
+                                        <input
+                                            type="checkbox"
+                                            checked={restriction.days[day]}
+                                            onChange={() => toggleDay(index, day)}
+                                            disabled={restriction.isEntered}
+                                        />
+                                        {day}
+                                    </label>
+                                ))}
+                            </div>
+
+                            {/* ENTER button */}
+                            {!restriction.isEntered && isRestrictionComplete(restriction) && (
+                                <button onClick={() => handleEnter(index)}>Enter</button>
+                            )}
                         </div>
                     ))}
 
-                    {/* Only show this if the last restriction has been "Entered" */}
+                    {/* Add another restriction */}
                     {canAddAnother && (
                         <button onClick={addRestriction}>Add Another Restriction</button>
                     )}
